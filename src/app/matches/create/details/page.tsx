@@ -125,11 +125,11 @@ export default function DetailsPage() {
           {/* Venue & Match Number Row */}
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              <Input label="Venue *" icon={<MapPin size={16} />} value={state.venue}
+              <Input label="Venue" icon={<MapPin size={16} />} value={state.venue}
                 onChange={(e) => update({ venue: e.target.value })} placeholder="Enter venue name..." />
             </div>
             <div>
-              <Input label="Match # *" icon={<Hash size={16} />} type="number" value={state.matchNumber}
+              <Input label="Match #" icon={<Hash size={16} />} type="number" value={state.matchNumber}
                 onChange={(e) => update({ matchNumber: e.target.value })} placeholder="e.g. 1" />
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function DetailsPage() {
           {/* Match Date Selector (Full Input Bar + Presets Below) */}
           <div className="space-y-2">
             <Input
-              label="Match Date *"
+              label="Match Date"
               icon={<Calendar size={16} />}
               type="date"
               min={todayStr}
@@ -183,7 +183,7 @@ export default function DetailsPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Input
-                label="Match Time *"
+                label="Match Time"
                 icon={<Clock size={16} />}
                 type="time"
                 min={state.matchDate === todayStr ? pageLoadTime : undefined}

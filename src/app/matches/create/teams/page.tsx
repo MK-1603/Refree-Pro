@@ -88,7 +88,7 @@ export default function TeamsPage() {
                     <JerseyIcon color={color} />
                   </div>
                   <div className="flex-1">
-                    <span className="text-[9px] uppercase font-bold text-muted tracking-wider block mb-0.5 select-none">{label} Name *</span>
+                    <span className="text-[9px] uppercase font-bold text-muted tracking-wider block mb-0.5 select-none">{label} Name</span>
                     <input
                       value={name}
                       onChange={(e) => update({ [key]: e.target.value.toUpperCase() } as any)}

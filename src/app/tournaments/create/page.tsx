@@ -52,7 +52,7 @@ export default function CreateTournamentPage() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
         <div className="space-y-4 pt-1">
           <Input 
-            label="Tournament Name *" 
+            label="Tournament Name" 
             icon={<Trophy size={16} />} 
             value={name}
             onChange={(e) => setName(e.target.value)} 
@@ -60,7 +60,7 @@ export default function CreateTournamentPage() {
           />
 
           <Input 
-            label="Venue / Location *" 
+            label="Venue / Location" 
             icon={<MapPin size={16} />} 
             value={venue}
             onChange={(e) => setVenue(e.target.value)} 
@@ -70,7 +70,7 @@ export default function CreateTournamentPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Input 
-                label="Start Date *" 
+                label="Start Date" 
                 icon={<Calendar size={16} />} 
                 type="date" 
                 value={startDate}
@@ -79,7 +79,7 @@ export default function CreateTournamentPage() {
             </div>
             <div>
               <Input 
-                label="End Date *" 
+                label="End Date" 
                 icon={<Calendar size={16} />} 
                 type="date" 
                 value={endDate}
