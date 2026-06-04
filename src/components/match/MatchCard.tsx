@@ -19,12 +19,23 @@ interface MatchCardProps {
 }
 
 export function MatchCard({ id, matchNumber, teamA, teamB, teamAColor, teamBColor, scoreA, scoreB, status, venue, matchDate, matchTime }: MatchCardProps) {
+  let displayStatus = status;
+  if (status === 'scheduled' && matchDate && matchTime) {
+    try {
+      const scheduledDate = new Date(`${matchDate}T${matchTime}`);
+      const now = new Date();
+      if (scheduledDate <= now) {
+        displayStatus = 'kickoff';
+      }
+    } catch {}
+  }
+
   return (
     <Link href={`/matches/${id}`}>
       <Card hover className="group">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-muted font-mono">MATCH #{matchNumber}</span>
-          <Badge status={status} />
+          <Badge status={displayStatus} />
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="font-bold text-sm flex-1 truncate" style={{ color: teamAColor }}>{teamA}</span>

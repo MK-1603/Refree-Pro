@@ -6,6 +6,7 @@ import { toPng } from 'html-to-image';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { Download, Share2 } from 'lucide-react';
+import { MatchTimer } from '@/lib/timer';
 
 const templates = ['Match Night', 'Broadcast Result', 'Matchday Premium', 'Minimal Sports'];
 
@@ -93,8 +94,8 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
 
   const templateStyles = [
     { bg: 'bg-[#0A0A0A]', accent: 'text-primary', scoreColor: 'text-white', border: 'border-primary/30' },
-    { bg: 'bg-white', accent: 'text-[#0F8A5F]', scoreColor: 'text-[#0A0A0A]', border: 'border-gray-200' },
-    { bg: 'bg-gradient-to-b from-[#0F1F17] to-[#0A0A0A]', accent: 'text-primary', scoreColor: 'text-white', border: 'border-primary/20' },
+    { bg: 'bg-white', accent: 'text-[#2563EB]', scoreColor: 'text-[#0A0A0A]', border: 'border-gray-200' },
+    { bg: 'bg-gradient-to-b from-[#0B1528] to-[#0A0A0A]', accent: 'text-primary', scoreColor: 'text-white', border: 'border-primary/20' },
     { bg: 'bg-[#111]', accent: 'text-white/60', scoreColor: 'text-white', border: 'border-white/10' },
   ];
 
@@ -168,7 +169,7 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
 
                 <div className="relative z-10 flex flex-col h-full p-8 justify-between">
                   <div className="text-center mt-2">
-                    <div className={`inline-block px-4 py-1.5 rounded-full border mb-4 ${template === 1 ? 'border-[#0F8A5F]/30 text-[#0F8A5F] bg-[#0F8A5F]/10' : 'border-white/10 bg-black/60'}`}>
+                    <div className={`inline-block px-4 py-1.5 rounded-full border mb-4 ${template === 1 ? 'border-[#2563EB]/30 text-[#2563EB] bg-[#2563EB]/10' : 'border-white/10 bg-black/60'}`}>
                       <p className={`text-[10px] tracking-widest font-black ${template !== 1 && ts.accent}`}>FINAL SCORE</p>
                     </div>
                     <p className={`text-xs uppercase tracking-widest font-bold ${template === 1 ? 'text-[#0A0A0A]' : 'text-white'}`}>{match.venue}</p>
@@ -210,7 +211,9 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
                       {goals.map(g => (
                         <div key={g.id} className="text-xs flex items-center justify-center gap-2">
                           <span className="font-semibold">{g.playerName}</span>
-                          <span className={`text-[10px] px-1.5 rounded font-bold ${template === 1 ? 'bg-[#0F8A5F]/10 text-[#0F8A5F]' : 'bg-primary/20 text-primary'}`}>{g.minute}&apos;</span>
+                          <span className={`text-[10px] px-1.5 rounded font-bold ${template === 1 ? 'bg-[#2563EB]/10 text-[#2563EB]' : 'bg-primary/20 text-primary'}`}>
+                            {g.elapsedMs !== null && g.elapsedMs !== undefined ? MatchTimer.formatDisplay(g.elapsedMs) : `${g.minute}'`}
+                          </span>
                         </div>
                       ))}
                     </div>

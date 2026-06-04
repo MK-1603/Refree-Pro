@@ -12,10 +12,11 @@ interface GoalModalProps {
   teamB: string;
   players: { name: string; jerseyNo?: number; team: string }[];
   currentMinute: number;
-  onSave: (data: { team: string; playerName: string; jerseyNo?: number; goalType: string; minute: number }) => Promise<void>;
+  elapsedMs?: number | null;
+  onSave: (data: { team: string; playerName: string; jerseyNo?: number; goalType: string; minute: number; elapsedMs?: number | null }) => Promise<void>;
 }
 
-export function GoalModal({ open, onClose, teamA, teamB, players, currentMinute, onSave }: GoalModalProps) {
+export function GoalModal({ open, onClose, teamA, teamB, players, currentMinute, elapsedMs, onSave }: GoalModalProps) {
   const [team, setTeam] = useState('team_a');
   const [playerName, setPlayerName] = useState('');
   const [jerseyNo, setJerseyNo] = useState('');
@@ -29,7 +30,7 @@ export function GoalModal({ open, onClose, teamA, teamB, players, currentMinute,
     if (!playerName) return;
     setLoading(true);
     try {
-      await onSave({ team, playerName, jerseyNo: jerseyNo ? parseInt(jerseyNo) : undefined, goalType, minute });
+      await onSave({ team, playerName, jerseyNo: jerseyNo ? parseInt(jerseyNo) : undefined, goalType, minute, elapsedMs });
       onClose();
     } finally {
       setLoading(false);

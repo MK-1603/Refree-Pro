@@ -11,6 +11,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       playerOut: body.playerOut,
       playerIn: body.playerIn,
       minute: body.minute,
+      elapsedMs: body.elapsedMs ?? null,
     }).returning();
     return NextResponse.json(sub, { status: 201 });
   } catch (e) {

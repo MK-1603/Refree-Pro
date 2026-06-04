@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
 import { Trash2, Plus, Edit2, Check, X } from 'lucide-react';
+import { Select } from '@/components/ui/Select';
 
 export default function PlayersPage({ params }: { params: Promise<{ id: string }> }) {
   const [id, setId] = useState('');

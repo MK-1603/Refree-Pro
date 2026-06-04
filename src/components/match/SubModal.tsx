@@ -12,10 +12,11 @@ interface SubModalProps {
   teamB: string;
   players: { name: string; jerseyNo?: number; team: string }[];
   currentMinute: number;
-  onSave: (data: { team: string; playerOut: string; playerIn: string; minute: number }) => Promise<void>;
+  elapsedMs?: number | null;
+  onSave: (data: { team: string; playerOut: string; playerIn: string; minute: number; elapsedMs?: number | null }) => Promise<void>;
 }
 
-export function SubModal({ open, onClose, teamA, teamB, players, currentMinute, onSave }: SubModalProps) {
+export function SubModal({ open, onClose, teamA, teamB, players, currentMinute, elapsedMs, onSave }: SubModalProps) {
   const [team, setTeam] = useState('team_a');
   const [playerOut, setPlayerOut] = useState('');
   const [playerIn, setPlayerIn] = useState('');
@@ -28,7 +29,7 @@ export function SubModal({ open, onClose, teamA, teamB, players, currentMinute, 
     if (!playerOut || !playerIn) return;
     setLoading(true);
     try {
-      await onSave({ team, playerOut, playerIn, minute });
+      await onSave({ team, playerOut, playerIn, minute, elapsedMs });
       onClose();
     } finally {
       setLoading(false);

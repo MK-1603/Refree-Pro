@@ -38,7 +38,7 @@ export default function DashboardPage() {
   const activeTournaments = tournaments.filter((t) => t.status === 'active');
 
   const quickActions = [
-    { icon: Plus, label: 'Create Match', href: '/matches/create/details', accent: true },
+    { icon: Plus, label: 'Schedule Match', href: '/matches/create/details', accent: true },
     { icon: Trophy, label: 'Create Tournament', href: '/tournaments/create' },
     { icon: FileText, label: 'Generate Report', href: '/reports' },
     { icon: History, label: 'View History', href: '/history' },
@@ -122,7 +122,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted max-w-[200px] text-center mb-4 leading-relaxed">Start by creating your first match or tournament.</p>
             <Button size="sm" onClick={() => router.push('/matches/create/details')} className="h-9">
               <Plus size={16} className="mr-1.5" />
-              Create Match
+              Schedule Match
             </Button>
           </Card>
         ) : (

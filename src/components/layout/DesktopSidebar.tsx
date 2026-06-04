@@ -26,8 +26,8 @@ export function DesktopSidebar() {
       collapsed ? 'w-16' : 'w-60'
     )}>
       <div className="flex items-center gap-3 p-4 border-b border-border h-16">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 overflow-hidden bg-card">
-          <img src="/image.png" alt="Logo" className="w-full h-full object-cover" />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-transparent dark:bg-card dark:shadow-lg dark:shadow-primary/20">
+          <img src="/image.png" alt="Logo" className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal" />
         </div>
         {!collapsed && <span className="font-bold text-sm tracking-wide">REFEREE PRO</span>}
       </div>

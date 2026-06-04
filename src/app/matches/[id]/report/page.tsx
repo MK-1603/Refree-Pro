@@ -5,6 +5,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { Button } from '@/components/ui/Button';
 import { FileText, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { MatchTimer } from '@/lib/timer';
 
 export default function MatchReportPage({ params }: { params: Promise<{ id: string }> }) {
   const [match, setMatch] = useState<any>(null);
@@ -30,7 +31,7 @@ export default function MatchReportPage({ params }: { params: Promise<{ id: stri
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const { width, height } = page.getSize();
-      const green = rgb(0.059, 0.541, 0.373);
+      const green = rgb(0.145, 0.388, 0.922); // Electric blue instead of green
       let y = height - 50;
 
       const draw = (text: string, x: number, yPos: number, size: number = 11, f = font, color = rgb(0, 0, 0)) => {
@@ -64,10 +65,11 @@ export default function MatchReportPage({ params }: { params: Promise<{ id: stri
       const goals = activeEvents.filter(e => e.eventType === 'goal');
       if (goals.length > 0) {
         draw('GOALS', 50, y, 11, bold, green); y -= 18;
-        draw("Min  Player                    Team              Type", 50, y, 9, font, rgb(0.4, 0.4, 0.4)); y -= 14;
+        draw("Time     Player                    Team              Type", 50, y, 9, font, rgb(0.4, 0.4, 0.4)); y -= 14;
         page.drawLine({ start: { x: 50, y }, end: { x: width - 50, y }, thickness: 0.5, color: rgb(0.8, 0.8, 0.8) }); y -= 12;
         for (const g of goals) {
-          draw(`${g.minute}'`, 50, y, 10, font); draw(g.playerName.slice(0, 25), 80, y, 10, font);
+          const timeText = g.elapsedMs !== null && g.elapsedMs !== undefined ? MatchTimer.formatDisplay(g.elapsedMs) : `${g.minute}'`;
+          draw(timeText, 50, y, 10, font); draw(g.playerName.slice(0, 25), 95, y, 10, font);
           draw(g.team === 'team_a' ? match.teamA : match.teamB, 300, y, 10, font);
           draw(g.goalType, 450, y, 10, font); y -= 14;
           if (y < 80) break;
@@ -80,7 +82,8 @@ export default function MatchReportPage({ params }: { params: Promise<{ id: stri
       if (cards.length > 0) {
         draw('CARDS', 50, y, 11, bold, rgb(0.9, 0.2, 0.2)); y -= 18;
         for (const c of cards) {
-          draw(`${c.minute}' ${c.cardType === 'yellow' ? '[Y]' : '[R]'} ${c.playerName} — ${c.team === 'team_a' ? match.teamA : match.teamB}`, 50, y, 10, font);
+          const timeText = c.elapsedMs !== null && c.elapsedMs !== undefined ? MatchTimer.formatDisplay(c.elapsedMs) : `${c.minute}'`;
+          draw(`${timeText} ${c.cardType === 'yellow' ? '[Y]' : '[R]'} ${c.playerName} — ${c.team === 'team_a' ? match.teamA : match.teamB}`, 50, y, 10, font);
           y -= 14; if (y < 80) break;
         }
         y -= 10;
@@ -91,7 +94,8 @@ export default function MatchReportPage({ params }: { params: Promise<{ id: stri
       if (subs.length > 0) {
         draw('SUBSTITUTIONS', 50, y, 11, bold, rgb(0.2, 0.5, 0.9)); y -= 18;
         for (const s of subs) {
-          draw(`${s.minute}' ${s.playerOut} → ${s.playerIn} (${s.team === 'team_a' ? match.teamA : match.teamB})`, 50, y, 10, font);
+          const timeText = s.elapsedMs !== null && s.elapsedMs !== undefined ? MatchTimer.formatDisplay(s.elapsedMs) : `${s.minute}'`;
+          draw(`${timeText} ${s.playerOut} → ${s.playerIn} (${s.team === 'team_a' ? match.teamA : match.teamB})`, 50, y, 10, font);
           y -= 14; if (y < 80) break;
         }
       }

@@ -14,6 +14,25 @@ export async function GET(req: Request) {
     if (tournamentId) query = query.where(eq(matches.tournamentId, tournamentId));
 
     const data = await query.orderBy(desc(matches.createdAt));
+
+    // Sort: running matches first (live, halftime, extra_time), then scheduled, then completed, then others.
+    // Within same priority, sort by createdAt descending.
+    const getStatusPriority = (s: string) => {
+      if (['live', 'halftime', 'extra_time'].includes(s)) return 1;
+      if (s === 'scheduled') return 2;
+      if (s === 'completed') return 3;
+      return 4;
+    };
+
+    data.sort((a, b) => {
+      const pA = getStatusPriority(a.status ?? 'scheduled');
+      const pB = getStatusPriority(b.status ?? 'scheduled');
+      if (pA !== pB) return pA - pB;
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
+
     return NextResponse.json(data);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -41,6 +60,21 @@ export async function POST(req: Request) {
 
     // Use raw neon SQL to avoid any ORM type coercion issues
     const sql = neon(process.env.DATABASE_URL!);
+
+    // Check for slot booking conflict (same date, time, and venue)
+    const existingConflicts = await sql`
+      SELECT id FROM matches 
+      WHERE match_date = ${body.matchDate} 
+        AND match_time = ${body.matchTime} 
+        AND LOWER(TRIM(venue)) = LOWER(TRIM(${body.venue}))
+    `;
+
+    if (existingConflicts && existingConflicts.length > 0) {
+      return NextResponse.json({ 
+        error: 'Slot conflict', 
+        detail: 'This time slot at the selected venue is already booked for another match.' 
+      }, { status: 400 });
+    }
 
     const rows = await sql`
       INSERT INTO matches (

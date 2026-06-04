@@ -38,7 +38,7 @@ export default function MatchesPage() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Match Hub</h1>
           <Button size="sm" onClick={() => router.push('/matches/create/details')}>
-            <Plus size={16} /> New Match
+            <Plus size={16} /> Schedule Match
           </Button>
         </div>
 
@@ -59,9 +59,9 @@ export default function MatchesPage() {
           <div className="text-center py-16 text-muted">
             <Swords size={48} className="mx-auto mb-4 opacity-20" />
             <p className="font-medium">No {tab !== 'all' ? tab : ''} matches</p>
-            <p className="text-sm mt-1 mb-4">Tap New Match to get started</p>
+            <p className="text-sm mt-1 mb-4">Tap Schedule Match to get started</p>
             <Button onClick={() => router.push('/matches/create/details')}>
-              <Plus size={16} /> Create Match
+              <Plus size={16} /> Schedule Match
             </Button>
           </div>
         ) : (

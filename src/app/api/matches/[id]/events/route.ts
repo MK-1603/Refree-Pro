@@ -15,7 +15,12 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
       ...gs.map((g) => ({ ...g, eventType: 'goal' })),
       ...cs.map((c) => ({ ...c, eventType: 'card' })),
       ...ss.map((s) => ({ ...s, eventType: 'sub' })),
-    ].sort((a, b) => a.minute - b.minute);
+    ].sort((a, b) => {
+      if (a.elapsedMs !== null && b.elapsedMs !== null && a.elapsedMs !== undefined && b.elapsedMs !== undefined) {
+        return a.elapsedMs - b.elapsedMs;
+      }
+      return a.minute - b.minute;
+    });
 
     return NextResponse.json(events);
   } catch (e) {

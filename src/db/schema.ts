@@ -20,8 +20,8 @@ export const matches = pgTable('matches', {
   refereeName: text('referee_name'),
   teamA: text('team_a').notNull(),
   teamB: text('team_b').notNull(),
-  teamAColor: text('team_a_color').default('#0F8A5F'),
-  teamBColor: text('team_b_color').default('#E74C3C'),
+  teamAColor: text('team_a_color').default('#E74C3C'),
+  teamBColor: text('team_b_color').default('#3498DB'),
   squadFormat: text('squad_format').notNull(),
   matchDuration: integer('match_duration').notNull(),
   breakDuration: integer('break_duration').notNull(),
@@ -55,6 +55,7 @@ export const goals = pgTable('goals', {
   team: text('team').notNull(),
   goalType: text('goal_type').notNull().default('normal'),
   minute: integer('minute').notNull(),
+  elapsedMs: integer('elapsed_ms'),
   isUndone: boolean('is_undone').default(false),
   createdAt: timestamp('created_at').defaultNow(),
 });
@@ -67,6 +68,7 @@ export const cards = pgTable('cards', {
   team: text('team').notNull(),
   cardType: text('card_type').notNull(),
   minute: integer('minute').notNull(),
+  elapsedMs: integer('elapsed_ms'),
   isUndone: boolean('is_undone').default(false),
   createdAt: timestamp('created_at').defaultNow(),
 });
@@ -78,6 +80,7 @@ export const substitutions = pgTable('substitutions', {
   playerOut: text('player_out').notNull(),
   playerIn: text('player_in').notNull(),
   minute: integer('minute').notNull(),
+  elapsedMs: integer('elapsed_ms'),
   isUndone: boolean('is_undone').default(false),
   createdAt: timestamp('created_at').defaultNow(),
 });

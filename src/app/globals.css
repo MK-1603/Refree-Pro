@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #00E676;
+  --color-primary: #2563EB;
   --color-surface: var(--surface);
-  --color-live: #00FF88;
+  --color-live: #00D2FF;
   --color-yellow-card: #F4D03F;
   --color-red-card: #E74C3C;
   --color-background: var(--background);
@@ -19,21 +19,21 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --background: #030705;
+    --background: #070A13;
     --card: #0A0A0A;
     --foreground: #ffffff;
     --muted: rgba(255, 255, 255, 0.4);
     --border: rgba(255, 255, 255, 0.1);
     
-    --primary: #00E676;
-    --surface: #060B08;
-    --border-color: #0F1F16;
-    --live: #00FF88;
+    --primary: #2563EB;
+    --surface: #0F172A;
+    --border-color: #1E293B;
+    --live: #00D2FF;
   }
 
   html.light {
     color-scheme: light;
-    --background: #f8fafc;
+    --background: #f2f2f7;
     --card: #ffffff;
     --foreground: #0a0a0a;
     --muted: rgba(10, 10, 10, 0.5);
@@ -69,8 +69,8 @@ body {
 
 .glass-heavy {
   backdrop-filter: blur(20px) saturate(200%);
-  background: rgba(15, 138, 95, 0.08);
-  border: 1px solid rgba(15, 138, 95, 0.2);
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 .score-digit {
@@ -87,7 +87,7 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #00FF88;
+  background: #FF3E3E;
   animation: pulse-live 1.5s ease-in-out infinite;
 }
 
@@ -104,11 +104,11 @@ body {
 /* Legacy light body overrides handled by variables */
 
 .premium-card {
-  background: linear-gradient(160deg, rgba(15, 31, 22, 0.8) 0%, rgba(5, 10, 7, 0.95) 100%);
-  border: 1px solid rgba(0, 230, 118, 0.15);
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.8) 0%, rgba(7, 10, 19, 0.95) 100%);
+  border: 1px solid rgba(37, 99, 235, 0.15);
   box-shadow: 
     inset 0 1px 1px rgba(255, 255, 255, 0.05),
-    0 8px 32px -8px rgba(0, 230, 118, 0.05);
+    0 8px 32px -8px rgba(37, 99, 235, 0.05);
   position: relative;
   overflow: hidden;
 }
@@ -120,7 +120,7 @@ body {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.5), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
 }

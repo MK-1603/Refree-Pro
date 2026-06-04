@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,8 +13,17 @@ interface ModalProps {
   position?: 'center' | 'bottom';
 }
 
-export function Modal({ open, onClose, title, children, className, position = 'center' }: ModalProps) {
-  const isBottom = position === 'bottom';
+export function Modal({ open, onClose, title, children, className, position }: ModalProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  const isBottom = position !== undefined ? position === 'bottom' : isMobile;
   
   return (
     <AnimatePresence>
@@ -32,17 +42,17 @@ export function Modal({ open, onClose, title, children, className, position = 'c
             exit={isBottom ? { opacity: 0, y: '100%' } : { opacity: 0, y: 60, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              'z-50 w-full max-w-md glass p-6 shadow-2xl shadow-black/50',
+              'z-50 p-6 shadow-2xl',
               isBottom 
-                ? 'fixed bottom-0 left-1/2 -translate-x-1/2 rounded-t-3xl rounded-b-none pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]' 
-                : 'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl',
+                ? 'w-full max-w-md fixed bottom-0 left-1/2 -translate-x-1/2 rounded-t-3xl rounded-b-none pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] bg-[#E5E5EA] dark:bg-[#1C1C1E] border-t border-black/10 dark:border-white/10' 
+                : 'w-[90%] max-w-[340px] fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[28px] bg-[#E5E5EA] dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10',
               className
             )}
           >
             {title && (
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold">{title}</h2>
-                <button onClick={onClose} className="p-1 rounded-lg hover:bg-foreground/10 transition-colors">
+              <div className="flex items-center justify-between mb-5 select-none">
+                <h2 className="text-lg font-bold text-zinc-950 dark:text-zinc-50">{title}</h2>
+                <button onClick={onClose} className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors outline-none">
                   <X size={18} />
                 </button>
               </div>

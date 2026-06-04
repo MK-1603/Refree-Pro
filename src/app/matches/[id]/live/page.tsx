@@ -34,6 +34,33 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
   const { toast } = useToast();
   const router = useRouter();
   const rafRef = useRef<number | undefined>(undefined);
+  const [pendingElapsedMs, setPendingElapsedMs] = useState<number | null>(null);
+
+  const getOffsetElapsedMs = () => {
+    const offset = timer.currentHalf === 2
+      ? (match?.matchDuration ?? 45) * 60 * 1000
+      : timer.currentHalf === 3
+      ? (match?.matchDuration ?? 45) * 2 * 60 * 1000
+      : 0;
+    return timer.elapsedMs + offset;
+  };
+
+  const triggerGoal = () => {
+    setPendingElapsedMs(getOffsetElapsedMs());
+    setShowGoal(true);
+  };
+  const triggerYellow = () => {
+    setPendingElapsedMs(getOffsetElapsedMs());
+    setShowYellow(true);
+  };
+  const triggerRed = () => {
+    setPendingElapsedMs(getOffsetElapsedMs());
+    setShowRed(true);
+  };
+  const triggerSub = () => {
+    setPendingElapsedMs(getOffsetElapsedMs());
+    setShowSub(true);
+  };
 
   useEffect(() => {
     params.then(async ({ id: matchId }) => {
@@ -79,16 +106,46 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [timer.isRunning]);
 
-  // Halftime auto-trigger
+  // Auto-pause timer when navigating away, hiding tab, or closing app
   useEffect(() => {
-    if (!match || timer.currentHalf !== 1 || !timer.isRunning) return;
+    if (!id || !timer.isRunning) return;
+
+    const pauseTimer = () => {
+      fetch(`/api/matches/${id}/timer/pause`, { method: 'POST', keepalive: true }).catch(() => {});
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        pauseTimer();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', pauseTimer);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', pauseTimer);
+      pauseTimer();
+    };
+  }, [id, timer.isRunning]);
+
+  // Halftime / Fulltime auto-trigger
+  useEffect(() => {
+    if (!match || !timer.isRunning) return;
     const halfMs = match.matchDuration * 60 * 1000;
-    if (timer.elapsedMs >= halfMs) {
+    if (timer.currentHalf === 1 && timer.elapsedMs >= halfMs) {
       setShowHalftimeModal(true);
+    } else if (timer.currentHalf === 2 && timer.elapsedMs >= halfMs) {
+      setShowEndModal(true);
     }
   }, [timer.elapsedMs, match, timer.currentHalf, timer.isRunning]);
 
-  const currentMinute = MatchTimer.getMinute(timer.elapsedMs);
+  const currentMinute = timer.currentHalf === 2
+    ? MatchTimer.getMinute(timer.elapsedMs + (match?.matchDuration ?? 45) * 60 * 1000)
+    : timer.currentHalf === 3
+    ? MatchTimer.getMinute(timer.elapsedMs + (match?.matchDuration ?? 45) * 2 * 60 * 1000)
+    : MatchTimer.getMinute(timer.elapsedMs);
 
   const apiCall = useCallback(async (url: string, body: object) => {
     const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -184,7 +241,17 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
           : e.eventType === 'card'
           ? `${e.playerName} — ${e.cardType === 'yellow' ? 'Yellow' : 'Red'} Card (${e.team === 'team_a' ? match?.teamA : match?.teamB})`
           : `${e.playerOut} → ${e.playerIn} (${e.team === 'team_a' ? match?.teamA : match?.teamB})`;
-        return <EventItem key={e.id} minute={e.minute} type={type as any} description={desc} isUndone={e.isUndone} />;
+        return (
+          <EventItem
+            key={e.id}
+            minute={e.minute}
+            elapsedMs={e.elapsedMs}
+            type={type as any}
+            description={desc}
+            teamColor={e.team === 'team_a' ? match?.teamAColor : match?.teamBColor}
+            isUndone={e.isUndone}
+          />
+        );
       })}
     </div>
   );
@@ -200,7 +267,7 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
       {/* Top ribbon */}
       <div className="glass border-b border-border/50 px-4 py-2 flex items-center justify-between text-xs text-muted">
         <div className="flex items-center gap-2">
-          <button onClick={() => router.push(`/matches/${id}/intro`)} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-foreground/10 transition-colors">
+          <button onClick={() => router.push(`/matches/${id}`)} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-foreground/10 transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </button>
           <span>{match.venue}</span>
@@ -235,6 +302,7 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
               isRunning={timer.isRunning}
               elapsedMs={timer.elapsedMs}
               currentHalf={timer.currentHalf}
+              matchDuration={match?.matchDuration}
             />
 
             {/* Timer controls */}
@@ -252,6 +320,44 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
               </Button>
             </div>
 
+            {/* Goal Laps Dashboard */}
+            {events.filter(e => e.eventType === 'goal' && !e.isUndone).length > 0 && (
+              <div className="w-full max-w-sm mt-3 glass border border-border/50 rounded-2xl p-4 space-y-3 shadow-lg">
+                <div className="flex items-center justify-between border-b border-border/30 pb-2">
+                  <span className="text-xs font-bold text-muted tracking-widest uppercase flex items-center gap-1.5">
+                    ⚽ GOAL LAPS
+                  </span>
+                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">
+                    STOPWATCH TIME
+                  </span>
+                </div>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {events
+                    .filter(e => e.eventType === 'goal' && !e.isUndone)
+                    .map((g, idx) => {
+                      const teamName = g.team === 'team_a' ? match.teamA : match.teamB;
+                      const teamColor = g.team === 'team_a' ? match.teamAColor : match.teamBColor;
+                      return (
+                        <div key={g.id} className="flex items-center justify-between text-sm py-1 border-b border-border/10 last:border-0">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: teamColor }} />
+                            <span className="font-semibold text-foreground">
+                              {g.playerName} {g.jerseyNo ? `#${g.jerseyNo}` : ''}
+                            </span>
+                            <span className="text-xs text-muted">({teamName})</span>
+                          </div>
+                          <span className="font-mono text-xs text-primary font-bold tabular-nums">
+                            {g.elapsedMs !== null && g.elapsedMs !== undefined
+                              ? MatchTimer.formatDisplay(g.elapsedMs)
+                              : `${g.minute}'`}
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
             {/* Mobile timeline toggle */}
             <button onClick={() => setShowTimeline(true)}
               className="lg:hidden flex items-center gap-2 text-xs text-muted hover:text-foreground mt-2">
@@ -260,10 +366,10 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
           </div>
 
           <QuickActions
-            onGoal={() => setShowGoal(true)}
-            onYellow={() => setShowYellow(true)}
-            onRed={() => setShowRed(true)}
-            onSub={() => setShowSub(true)}
+            onGoal={triggerGoal}
+            onYellow={triggerYellow}
+            onRed={triggerRed}
+            onSub={triggerSub}
             onUndo={() => setShowUndo(true)}
           />
         </div>
@@ -288,13 +394,13 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
 
       {/* Modals */}
       <GoalModal open={showGoal} onClose={() => setShowGoal(false)} teamA={match.teamA} teamB={match.teamB}
-        players={players} currentMinute={currentMinute} onSave={handleGoal} />
+        players={players} currentMinute={currentMinute} elapsedMs={pendingElapsedMs} onSave={handleGoal} />
       <CardModal open={showYellow} onClose={() => setShowYellow(false)} cardType="yellow"
-        teamA={match.teamA} teamB={match.teamB} players={players} currentMinute={currentMinute} onSave={handleCard} />
+        teamA={match.teamA} teamB={match.teamB} players={players} currentMinute={currentMinute} elapsedMs={pendingElapsedMs} onSave={handleCard} />
       <CardModal open={showRed} onClose={() => setShowRed(false)} cardType="red"
-        teamA={match.teamA} teamB={match.teamB} players={players} currentMinute={currentMinute} onSave={handleCard} />
+        teamA={match.teamA} teamB={match.teamB} players={players} currentMinute={currentMinute} elapsedMs={pendingElapsedMs} onSave={handleCard} />
       <SubModal open={showSub} onClose={() => setShowSub(false)} teamA={match.teamA} teamB={match.teamB}
-        players={players} currentMinute={currentMinute} onSave={handleSub} />
+        players={players} currentMinute={currentMinute} elapsedMs={pendingElapsedMs} onSave={handleSub} />
 
       {/* Undo modal */}
       <Modal open={showUndo} onClose={() => setShowUndo(false)} title="Undo Last Event">

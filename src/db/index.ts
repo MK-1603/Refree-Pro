@@ -30,8 +30,8 @@ export async function ensureTables() {
       referee_name TEXT,
       team_a TEXT NOT NULL,
       team_b TEXT NOT NULL,
-      team_a_color TEXT DEFAULT '#0F8A5F',
-      team_b_color TEXT DEFAULT '#E74C3C',
+      team_a_color TEXT DEFAULT '#E74C3C',
+      team_b_color TEXT DEFAULT '#3498DB',
       squad_format TEXT NOT NULL,
       match_duration INTEGER NOT NULL,
       break_duration INTEGER NOT NULL,
@@ -149,4 +149,9 @@ export async function ensureTables() {
       updated_at TIMESTAMP DEFAULT NOW()
     )
   `;
+
+  // Ensure elapsed_ms columns exist for event logs to support stop clock laps
+  await sql`ALTER TABLE goals ADD COLUMN IF NOT EXISTS elapsed_ms INTEGER;`;
+  await sql`ALTER TABLE cards ADD COLUMN IF NOT EXISTS elapsed_ms INTEGER;`;
+  await sql`ALTER TABLE substitutions ADD COLUMN IF NOT EXISTS elapsed_ms INTEGER;`;
 }

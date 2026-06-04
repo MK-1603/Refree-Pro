@@ -14,6 +14,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       team: body.team,
       goalType: body.goalType ?? 'normal',
       minute: body.minute,
+      elapsedMs: body.elapsedMs ?? null,
     }).returning();
 
     // Update score atomically

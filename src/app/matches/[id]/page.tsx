@@ -108,9 +108,10 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
             {tab === 'timeline' && (
               <div className="space-y-1">
                 {events.filter(e => !e.isUndone).map(e => (
-                  <EventItem key={e.id} minute={e.minute}
+                  <EventItem key={e.id} minute={e.minute} elapsedMs={e.elapsedMs}
                     type={e.eventType === 'goal' ? 'goal' : e.cardType === 'yellow' ? 'yellow' : e.cardType === 'red' ? 'red' : 'sub'}
                     description={e.eventType === 'goal' ? `${e.playerName} — ${e.goalType}` : e.eventType === 'card' ? `${e.playerName} — ${e.cardType}` : `${e.playerOut} → ${e.playerIn}`}
+                    teamColor={e.team === 'team_a' ? match.teamAColor : match.teamBColor}
                     isUndone={e.isUndone}
                   />
                 ))}

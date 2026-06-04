@@ -12,6 +12,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       team: body.team,
       cardType: body.cardType,
       minute: body.minute,
+      elapsedMs: body.elapsedMs ?? null,
     }).returning();
     return NextResponse.json(card, { status: 201 });
   } catch (e) {

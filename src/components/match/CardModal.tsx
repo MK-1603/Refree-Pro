@@ -13,10 +13,11 @@ interface CardModalProps {
   teamB: string;
   players: { name: string; jerseyNo?: number; team: string }[];
   currentMinute: number;
-  onSave: (data: { team: string; playerName: string; jerseyNo?: number; cardType: string; minute: number }) => Promise<void>;
+  elapsedMs?: number | null;
+  onSave: (data: { team: string; playerName: string; jerseyNo?: number; cardType: string; minute: number; elapsedMs?: number | null }) => Promise<void>;
 }
 
-export function CardModal({ open, onClose, cardType, teamA, teamB, players, currentMinute, onSave }: CardModalProps) {
+export function CardModal({ open, onClose, cardType, teamA, teamB, players, currentMinute, elapsedMs, onSave }: CardModalProps) {
   const [team, setTeam] = useState('team_a');
   const [playerName, setPlayerName] = useState('');
   const [jerseyNo, setJerseyNo] = useState('');
@@ -30,7 +31,7 @@ export function CardModal({ open, onClose, cardType, teamA, teamB, players, curr
     if (!playerName) return;
     setLoading(true);
     try {
-      await onSave({ team, playerName, jerseyNo: jerseyNo ? parseInt(jerseyNo) : undefined, cardType, minute });
+      await onSave({ team, playerName, jerseyNo: jerseyNo ? parseInt(jerseyNo) : undefined, cardType, minute, elapsedMs });
       onClose();
     } finally {
       setLoading(false);

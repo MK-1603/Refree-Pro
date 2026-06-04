@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 const statusConfig: Record<string, { label: string; className: string }> = {
   live:       { label: 'LIVE',       className: 'bg-live/20 text-live border border-live/30' },
   scheduled:  { label: 'SCHEDULED',  className: 'bg-foreground/5 text-muted border border-border' },
+  kickoff:    { label: 'KICK OFF',   className: 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 animate-pulse font-extrabold' },
   completed:  { label: 'COMPLETED',  className: 'bg-primary/20 text-primary border border-primary/30' },
   halftime:   { label: 'HALF TIME',  className: 'bg-yellow-card/20 text-yellow-card border border-yellow-card/30' },
   extra_time: { label: 'EXTRA TIME', className: 'bg-orange-500/20 text-orange-400 border border-orange-500/30' },

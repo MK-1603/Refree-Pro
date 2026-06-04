@@ -30,7 +30,7 @@ export default function TournamentReportPage({ params }: { params: Promise<{ id:
       const pdfDoc = await PDFDocument.create();
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-      const green = rgb(0.059, 0.541, 0.373);
+      const green = rgb(0.145, 0.388, 0.922); // Electric blue instead of green
 
       // Page 1: Summary
       let page = pdfDoc.addPage([595, 842]);

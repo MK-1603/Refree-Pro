@@ -104,7 +104,16 @@ export default function HalftimePage({ params }: { params: Promise<{ id: string 
                   : e.eventType === 'card'
                   ? `${e.playerName} — ${e.cardType} card`
                   : `${e.playerOut} → ${e.playerIn}`;
-                return <EventItem key={e.id} minute={e.minute} type={type as any} description={desc} />;
+                return (
+                  <EventItem
+                    key={e.id}
+                    minute={e.minute}
+                    elapsedMs={e.elapsedMs}
+                    type={type as any}
+                    description={desc}
+                    teamColor={e.team === 'team_a' ? match.teamAColor : match.teamBColor}
+                  />
+                );
               })}
             </div>
           )}

@@ -97,8 +97,8 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
           <div className="grid md:grid-cols-2 gap-4">
             <Card className="p-4">
               <p className="text-xs text-muted tracking-widest mb-3">QUICK ACTIONS</p>
-              <Button className="w-full mb-2" size="sm" onClick={() => router.push(`/matches/create/details`)}>
-                <Plus size={14} /> Add Match
+              <Button className="w-full mb-2" size="sm" onClick={() => router.push(`/matches/create/details?tournamentId=${id}`)}>
+                <Plus size={14} /> Schedule Match
               </Button>
               <Button variant="secondary" className="w-full" size="sm" onClick={() => router.push(`/tournaments/${id}/report`)}>
                 <FileText size={14} /> Generate Report
@@ -114,8 +114,16 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
 
         {tab === 'fixtures' && (
           <div className="space-y-3">
-            {fixtures.length === 0 ? <p className="text-center text-muted/50 py-8">No upcoming fixtures</p> :
-              fixtures.map((m: any) => <MatchCard key={m.id} {...m} />)}
+            {fixtures.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted/50 text-sm mb-4">No upcoming fixtures</p>
+                <Button size="sm" onClick={() => router.push(`/matches/create/details?tournamentId=${id}`)}>
+                  <Plus size={14} /> Schedule Match
+                </Button>
+              </div>
+            ) : (
+              fixtures.map((m: any) => <MatchCard key={m.id} {...m} />)
+            )}
           </div>
         )}
 
