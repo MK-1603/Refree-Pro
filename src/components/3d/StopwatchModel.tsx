@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useMatchStore } from '@/store/matchStore';
 import * as THREE from 'three';
@@ -22,16 +22,6 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
   const msTextRef = useRef<HTMLSpanElement>(null);
   const halfTextRef = useRef<HTMLSpanElement>(null);
   const isRunningRef = useRef<boolean>(false);
-  
-  const [isLight, setIsLight] = useState(false);
-
-  useEffect(() => {
-    const checkTheme = () => setIsLight(document.documentElement.classList.contains('light'));
-    checkTheme();
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
 
   useFrame((state, delta) => {
     // Floating animation removed per user request
@@ -69,7 +59,7 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
     }
     
     if (timeTextRef.current && msTextRef.current && halfTextRef.current) {
-       const textColor = isLight ? '#000000' : '#ffffff';
+       const textColor = '#ffffff';
        
        timeTextRef.current.style.color = textColor;
        msTextRef.current.style.color = textColor;
@@ -97,7 +87,7 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
       {/* Dial base */}
       <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
         <cylinderGeometry args={[2, 2, 0.1, 64]} />
-        <meshStandardMaterial color={isLight ? "#f8fafc" : "#0f172a"} roughness={0.9} metalness={0.1} />
+        <meshStandardMaterial color="#000000" roughness={0.9} metalness={0.1} />
       </mesh>
 
       {/* Tick Marks */}
@@ -111,7 +101,7 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
           return (
             <mesh key={i} position={[x, y, 0]} rotation={[0, 0, -angle]}>
               <boxGeometry args={[isMajor ? 0.03 : 0.015, isMajor ? 0.15 : 0.08, 0.01]} />
-              <meshStandardMaterial color={isLight ? (isMajor ? "#0f172a" : "#94a3b8") : (isMajor ? "#ffffff" : "#64748b")} />
+              <meshStandardMaterial color={isMajor ? "#ffffff" : "#94a3b8"} />
             </mesh>
           );
         })}
@@ -131,11 +121,11 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
       <group ref={minuteHand} position={[0, 0, 0.1]}>
         <mesh position={[0, 0.6, 0]} castShadow>
           <boxGeometry args={[0.06, 1.2, 0.02]} />
-          <meshStandardMaterial color={isLight ? "#334155" : "#ffffff"} />
+          <meshStandardMaterial color="#ffffff" />
         </mesh>
         <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.08, 0.08, 0.03, 16]} />
-          <meshStandardMaterial color={isLight ? "#334155" : "#ffffff"} />
+          <meshStandardMaterial color="#ffffff" />
         </mesh>
       </group>
       
