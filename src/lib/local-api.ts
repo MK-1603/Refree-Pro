@@ -66,7 +66,7 @@ export async function localApiRouter(req: Request): Promise<Response | null> {
             const handlerFn = route.handler[method];
             if (handlerFn) {
                 const params = match.groups ? Promise.resolve(match.groups) : Promise.resolve({});
-                return (handlerFn as any)(req, { params });
+                return (handlerFn as Function)(req, { params });
             } else {
                 return new Response('Method Not Allowed', { status: 405 });
             }

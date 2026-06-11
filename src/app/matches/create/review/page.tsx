@@ -36,6 +36,11 @@ export default function ReviewPage() {
   }, [createdSuccess, reset, router]);
 
   const handleCreate = async () => {
+    if (!navigator.onLine) {
+      toast('Internet connection is required to create a new match.', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/matches', {

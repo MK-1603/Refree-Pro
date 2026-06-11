@@ -9,7 +9,7 @@ export const cookies = async () => ({
 });
 
 export const NextResponse = {
-  json: (body: any, init?: ResponseInit) => new Response(JSON.stringify(body), {
+  json: (body: unknown, init?: ResponseInit) => new Response(JSON.stringify(body), {
     ...init,
     headers: { 'Content-Type': 'application/json', ...init?.headers }
   })
@@ -17,6 +17,7 @@ export const NextResponse = {
 
 // Mock Neon SQL tagged template for PGlite
 export function neon(url: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async function sql(strings: TemplateStringsArray, ...values: any[]): Promise<any[]> {
     let text = '';
     for (let i = 0; i < strings.length; i++) {

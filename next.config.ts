@@ -6,6 +6,7 @@ const withSerwist = withSerwistInit({
   swDest: 'public/sw.js',
   reloadOnOnline: true,
   disable: false, // Enabled even in dev so you can test full offline on localhost
+  maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // 15MB to allow pglite.wasm
 });
 
 const nextConfig: NextConfig = {

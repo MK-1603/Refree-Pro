@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     const cookieStore = await cookies();
     const deviceId = cookieStore.get('device_id')?.value;
 
-    let conditions: (SQL<unknown> | undefined)[] = [];
+    const conditions: (SQL<unknown> | undefined)[] = [];
     if (status) conditions.push(eq(matches.status, status));
     if (tournamentId) conditions.push(eq(matches.tournamentId, tournamentId));
     if (deviceId) conditions.push(eq(matches.deviceId, deviceId));
