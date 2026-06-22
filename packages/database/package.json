@@ -1,0 +1,15 @@
+{
+  "name": "@referee-pro/database",
+  "version": "1.0.0",
+  "main": "src/db/index.ts",
+  "types": "src/db/index.ts",
+  "dependencies": {
+    "drizzle-orm": "^0.30.10",
+    "@neondatabase/serverless": "^0.9.0",
+    "@electric-sql/pglite": "^0.1.1"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.20.14",
+    "typescript": "^5.0.0"
+  }
+}
