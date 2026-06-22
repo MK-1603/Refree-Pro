@@ -3,7 +3,5 @@
   "/matches/[id]/page": "app/matches/[id]/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/history/page": "app/history/page.js",
-  "/matches/[id]/report/page": "app/matches/[id]/report/page.js",
-  "/tournaments/page": "app/tournaments/page.js",
-  "/_not-found/page": "app/_not-found/page.js"
+  "/matches/[id]/report/page": "app/matches/[id]/report/page.js"
 }

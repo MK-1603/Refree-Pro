@@ -30,6 +30,8 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
   const [showDecisionPanel, setShowDecisionPanel] = useState(false);
   const [customInjuryTime, setCustomInjuryTime] = useState('');
   const [timeExceeded, setTimeExceeded] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [editState, setEditState] = useState({ minute: '', playerName: '', playerIn: '', playerOut: '' });
 
   const { timer, setTimer, tickTimer, setScore, scoreA, scoreB } = useMatchStore();
   const { toast } = useToast();
@@ -179,6 +181,36 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
       setShowUndo(false);
     } catch { toast('Undo failed', 'error'); }
   };
+
+  const handleUpdateEvent = async () => {
+    if (!editingEvent) return;
+    try {
+      const type = editingEvent.eventType === 'goal' ? 'goal' : editingEvent.cardType ? editingEvent.cardType : 'sub';
+      const payload = {
+        ...editingEvent,
+        eventType: type,
+        minute: parseInt(editState.minute) || editingEvent.minute,
+        playerName: editState.playerName,
+        playerIn: editState.playerIn,
+        playerOut: editState.playerOut,
+      };
+      await fetch(`/api/matches/${id}/events/${editingEvent.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      setEvents(evs => evs.map(e => e.id === editingEvent.id ? { ...e, ...payload } : e));
+      setEditingEvent(null);
+      toast('Event updated');
+    } catch { toast('Failed to update event', 'error'); }
+  };
+
+  useEffect(() => {
+    if (editingEvent) {
+      setEditState({
+        minute: String(editingEvent.minute),
+        playerName: editingEvent.playerName || '',
+        playerIn: editingEvent.playerIn || '',
+        playerOut: editingEvent.playerOut || '',
+      });
+    }
+  }, [editingEvent]);
 
   if (!match) return (
     <div className="fixed inset-0 flex items-center justify-center bg-[#08080E]">
@@ -467,6 +499,38 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
         </div>
       </Modal>
 
+      <Modal open={!!editingEvent} onClose={() => setEditingEvent(null)} title="Edit Event">
+        {editingEvent && (
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-white/50 mb-1.5 block uppercase tracking-wider font-semibold">Minute</label>
+              <input type="number" value={editState.minute} onChange={e => setEditState({ ...editState, minute: e.target.value })} className="w-full bg-white/[0.04] border border-white/[0.07] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors" />
+            </div>
+            {editingEvent.eventType === 'sub' ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-white/50 mb-1.5 block uppercase tracking-wider font-semibold">Player Out</label>
+                  <input value={editState.playerOut} onChange={e => setEditState({ ...editState, playerOut: e.target.value })} className="w-full bg-white/[0.04] border border-white/[0.07] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors" />
+                </div>
+                <div>
+                  <label className="text-xs text-white/50 mb-1.5 block uppercase tracking-wider font-semibold">Player In</label>
+                  <input value={editState.playerIn} onChange={e => setEditState({ ...editState, playerIn: e.target.value })} className="w-full bg-white/[0.04] border border-white/[0.07] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors" />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="text-xs text-white/50 mb-1.5 block uppercase tracking-wider font-semibold">Player Name</label>
+                <input value={editState.playerName} onChange={e => setEditState({ ...editState, playerName: e.target.value })} className="w-full bg-white/[0.04] border border-white/[0.07] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors" />
+              </div>
+            )}
+            <div className="flex gap-3 mt-6 pt-2 border-t border-white/[0.05]">
+              <Button variant="ghost" className="flex-1 bg-white/[0.03] hover:bg-white/[0.08]" onClick={() => setEditingEvent(null)}>Cancel</Button>
+              <Button className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white" onClick={handleUpdateEvent}>Save Changes</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
       {/* ══════════ TIMELINE DRAWER ══════════ */}
       <AnimatePresence>
         {showTimeline && (
@@ -492,7 +556,7 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
                   let name = e.eventType === 'sub' ? `${e.playerOut} → ${e.playerIn}` : e.playerName;
                   if (e.jerseyNo) name += ` #${e.jerseyNo}`;
                   const extra = e.eventType === 'goal' && e.goalType !== 'normal' ? ` (${e.goalType})` : '';
-                  return <EventItem key={e.id} minute={e.minute} elapsedMs={e.elapsedMs} type={type as any} playerName={`${name}${extra}`} teamSide={e.team === 'team_a' ? 'home' : 'away'} isUndone={e.isUndone} />;
+                  return <EventItem key={e.id} minute={e.minute} elapsedMs={e.elapsedMs} type={type as any} playerName={`${name}${extra}`} teamSide={e.team === 'team_a' ? 'home' : 'away'} isUndone={e.isUndone} onClick={() => !e.isUndone && setEditingEvent(e)} />;
                 })}
                 {events.length === 0 && (
                   <div className="flex items-center justify-center h-40 text-white/20 text-sm">No events yet</div>

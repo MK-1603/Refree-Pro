@@ -388,3 +388,17 @@
 {"timestamp":"00:30:38.964","source":"Server","level":"LOG","message":"○ Compiling /matches/[id]/report ..."}
 {"timestamp":"00:31:09.613","source":"Server","level":"LOG","message":"○ Compiling /history ..."}
 {"timestamp":"00:31:12.864","source":"Server","level":"LOG","message":"○ Compiling /tournaments ..."}
+{"timestamp":"00:58:18.631","source":"Server","level":"ERROR","message":"Failed to proxy http://localhost:4000/api/v1/matches/1813ff78-17da-4330-bd05-cef9bf62ccd9 AggregateError"}
+{"timestamp":"00:58:18.635","source":"Server","level":"ERROR","message":"AggregateError"}
+{"timestamp":"00:58:18.657","source":"Server","level":"ERROR","message":"Failed to proxy http://localhost:4000/api/v1/matches/1813ff78-17da-4330-bd05-cef9bf62ccd9/events AggregateError"}
+{"timestamp":"00:58:18.660","source":"Server","level":"ERROR","message":"AggregateError"}
+{"timestamp":"00:58:19.378","source":"Browser","level":"ERROR","message":"unhandledRejection: SyntaxError: Failed to execute 'json' on 'Response': Unexpected token 'I', \"Internal S\"... is not valid JSON"}
+{"timestamp":"00:58:21.828","source":"Server","level":"LOG","message":"○ Compiling /_error ..."}
+{"timestamp":"00:58:25.228","source":"Server","level":"ERROR","message":"Failed to proxy http://localhost:4000/api/v1/matches/1813ff78-17da-4330-bd05-cef9bf62ccd9 AggregateError"}
+{"timestamp":"00:58:25.230","source":"Server","level":"ERROR","message":"AggregateError"}
+{"timestamp":"00:58:25.243","source":"Server","level":"ERROR","message":"Failed to proxy http://localhost:4000/api/v1/matches/1813ff78-17da-4330-bd05-cef9bf62ccd9/events AggregateError"}
+{"timestamp":"00:58:25.246","source":"Server","level":"ERROR","message":"AggregateError"}
+{"timestamp":"00:59:05.019","source":"Server","level":"ERROR","message":"Failed to proxy http://localhost:4000/api/v1/matches/1813ff78-17da-4330-bd05-cef9bf62ccd9 AggregateError"}
+{"timestamp":"00:59:05.021","source":"Server","level":"ERROR","message":"AggregateError"}
+{"timestamp":"00:59:05.034","source":"Server","level":"ERROR","message":"Failed to proxy http://localhost:4000/api/v1/matches/1813ff78-17da-4330-bd05-cef9bf62ccd9/events AggregateError"}
+{"timestamp":"00:59:05.035","source":"Server","level":"ERROR","message":"AggregateError"}

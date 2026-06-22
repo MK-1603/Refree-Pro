@@ -345,4 +345,28 @@ router.post('/:id/timer/injury-time', async (req: Request, res: Response) => {
   } catch (e: any) { res.status(500).json({ error: 'Failed' }); }
 });
 
+// ═══════════════════════════════════════
+// PUT /api/matches/:id/events/:eventId
+// ═══════════════════════════════════════
+router.put('/:id/events/:eventId', async (req: Request, res: Response) => {
+  try {
+    const { id, eventId } = req.params;
+    const { eventType, minute, playerName, jerseyNo, playerIn, playerOut } = req.body;
+
+    if (eventType === 'goal') {
+      await db.update(goals).set({ minute, playerName, jerseyNo: jerseyNo ?? null }).where(eq(goals.id, eventId));
+    } else if (eventType === 'card' || eventType === 'yellow' || eventType === 'red') {
+      await db.update(cards).set({ minute, playerName, jerseyNo: jerseyNo ?? null }).where(eq(cards.id, eventId));
+    } else if (eventType === 'sub') {
+      await db.update(substitutions).set({ minute, playerIn, playerOut }).where(eq(substitutions.id, eventId));
+    } else {
+      return res.status(400).json({ error: 'Unknown event type' });
+    }
+
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: 'Failed to update event', detail: e.message });
+  }
+});
+
 export default router;

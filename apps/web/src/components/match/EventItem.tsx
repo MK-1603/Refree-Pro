@@ -1,4 +1,5 @@
 import { MatchTimer } from '@/lib/timer';
+import { Edit2 } from 'lucide-react';
 
 interface EventItemProps {
   minute: number;
@@ -7,15 +8,21 @@ interface EventItemProps {
   playerName: string;
   teamSide?: 'home' | 'away';
   isUndone?: boolean;
+  onClick?: () => void;
 }
 
-export function EventItem({ minute, elapsedMs, type, playerName, teamSide = 'home', isUndone }: EventItemProps) {
+export function EventItem({ minute, elapsedMs, type, playerName, teamSide = 'home', isUndone, onClick }: EventItemProps) {
   const timeDisplay = elapsedMs !== null && elapsedMs !== undefined
     ? MatchTimer.formatDisplay(elapsedMs)
     : `${minute}'`;
 
   return (
-    <div className={`grid grid-cols-[1fr_auto_1fr] gap-4 items-center py-2 px-2 ${isUndone ? 'opacity-40 line-through' : ''}`}>
+    <div 
+      onClick={onClick}
+      className={`grid grid-cols-[1fr_auto_1fr] gap-4 items-center py-2 px-2 relative group ${
+        isUndone ? 'opacity-40 line-through' : ''
+      } ${onClick ? 'cursor-pointer hover:bg-white/[0.04] active:bg-white/[0.08] rounded-[10px] transition-colors' : ''}`}
+    >
       {/* Home Side */}
       <div className="flex justify-end items-center gap-2 text-right">
         {teamSide === 'home' && (
@@ -43,6 +50,15 @@ export function EventItem({ minute, elapsedMs, type, playerName, teamSide = 'hom
           </>
         )}
       </div>
+
+      {/* Edit Icon Overlay (Visible on hover if onClick is provided) */}
+      {onClick && !isUndone && (
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="p-1.5 rounded-md bg-white/10 text-white/60 hover:text-white hover:bg-white/20">
+            <Edit2 size={13} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
