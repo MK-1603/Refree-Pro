@@ -26,6 +26,15 @@ export default function MatchesPage() {
     }).catch(() => setLoading(false));
   }, []);
 
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this match?')) {
+      await matchService.deleteMatch(id);
+      setMatches(matches.filter(m => m.id !== id));
+    }
+  };
+
   const filtered = tab === 'all' ? matches : matches.filter(m => m.status === tab);
   const live = filtered.filter(m => m.status === 'live');
   const upcoming = filtered.filter(m => m.status === 'scheduled');
@@ -93,19 +102,19 @@ export default function MatchesPage() {
                 <h2 className="text-xs text-live font-semibold tracking-widest mb-3 flex items-center gap-2">
                   <span className="live-dot" /> LIVE
                 </h2>
-                <div className="space-y-3">{live.map(m => <MatchCard key={m.id} {...m} />)}</div>
+                <div className="space-y-3">{live.map(m => <MatchCard key={m.id} {...m} onDelete={(e) => handleDelete(m.id, e)} />)}</div>
               </section>
             )}
             {upcoming.length > 0 && (
               <section>
                 <h2 className="text-xs text-muted font-semibold tracking-widest mb-3">UPCOMING</h2>
-                <div className="space-y-3">{upcoming.map(m => <MatchCard key={m.id} {...m} />)}</div>
+                <div className="space-y-3">{upcoming.map(m => <MatchCard key={m.id} {...m} onDelete={(e) => handleDelete(m.id, e)} />)}</div>
               </section>
             )}
             {recent.length > 0 && (
               <section>
                 <h2 className="text-xs text-muted font-semibold tracking-widest mb-3">RECENT</h2>
-                <div className="space-y-3">{recent.map(m => <MatchCard key={m.id} {...m} />)}</div>
+                <div className="space-y-3">{recent.map(m => <MatchCard key={m.id} {...m} onDelete={(e) => handleDelete(m.id, e)} />)}</div>
               </section>
             )}
           </div>

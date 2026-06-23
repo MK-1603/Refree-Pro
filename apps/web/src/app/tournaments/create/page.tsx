@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { MapPin, Trophy, Calendar, ChevronLeft, Check, ArrowRight, Rocket } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { tournamentService } from '@/services/tournamentService';
 
 const STEPS = [
   { id: 1, label: 'Info',  desc: 'Name & venue' },
@@ -76,13 +77,7 @@ export default function CreateTournamentPage() {
     if (!step2Valid) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/tournaments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), venue: venue.trim(), startDate, endDate }),
-      });
-      if (!res.ok) throw new Error();
-      const t = await res.json();
+      const t = await tournamentService.createTournament({ name: name.trim(), venue: venue.trim(), startDate, endDate });
       toast('Tournament created! 🎉');
       router.push(`/tournaments/${t.id}`);
     } catch {

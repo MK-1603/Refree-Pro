@@ -9,7 +9,7 @@ import {
   ChevronLeft, Play, Edit, Lock, FileText, Image as ImageIcon,
   Activity, Users, BarChart3, Info,
   MapPin, Calendar, Clock, User, Layers, Timer, Coffee, Zap,
-  ArrowLeftRight, AlertCircle,
+  ArrowLeftRight, AlertCircle, Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { matchService } from '@/services/matchService';
@@ -152,6 +152,17 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     });
   }, [params]);
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this match?')) return;
+    try {
+      await matchService.deleteMatch(id);
+      toast('Match deleted');
+      router.push('/matches');
+    } catch (err) {
+      toast('Failed to delete match', 'error');
+    }
+  };
+
   if (loading) return (
     <AppLayout>
       <div className="p-4 max-w-lg mx-auto space-y-4 pt-6">
@@ -255,12 +266,20 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
         {/* ── ACTION BUTTONS ── */}
         <div className="mx-4 mt-3 flex flex-wrap gap-2">
           {match.status === 'scheduled' && (
-            <button
-              onClick={() => router.push(`/matches/${id}/countdown`)}
-              className="flex items-center gap-2 px-4 h-10 rounded-xl bg-foreground text-background text-[12px] font-black hover:opacity-90 active:scale-95 transition-all"
-            >
-              <Play size={13} className="fill-current" /> Start Match
-            </button>
+            <>
+              <button
+                onClick={() => router.push(`/matches/${id}/countdown`)}
+                className="flex items-center gap-2 px-4 h-10 rounded-xl bg-foreground text-background text-[12px] font-black hover:opacity-90 active:scale-95 transition-all"
+              >
+                <Play size={13} className="fill-current" /> Start Match
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-2 px-4 h-10 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-[12px] font-black hover:bg-red-500/20 active:scale-95 transition-all"
+              >
+                <Trash2 size={13} /> Delete
+              </button>
+            </>
           )}
           {match.status === 'live' && (
             <button
@@ -307,6 +326,12 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 className="flex items-center gap-2 px-4 h-10 rounded-xl border border-border/40 bg-foreground/5 text-[12px] font-black hover:bg-foreground/10 active:scale-95 transition-all"
               >
                 <ImageIcon size={13} /> Poster
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-2 px-4 h-10 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-[12px] font-black hover:bg-red-500/20 active:scale-95 transition-all"
+              >
+                <Trash2 size={13} /> Delete
               </button>
             </>
           )}

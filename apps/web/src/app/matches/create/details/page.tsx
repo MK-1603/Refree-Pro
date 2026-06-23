@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { MapPin, Calendar, Clock, User, Trophy, ChevronLeft, AlertTriangle, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { matchService } from '@/services/matchService';
+import { tournamentService } from '@/services/tournamentService';
 
 export default function DetailsPage() {
   const { state, update } = useCreateMatch();
@@ -33,8 +34,7 @@ export default function DetailsPage() {
   const pageLoadTime = pageLoadTimeRef.current;
 
   useEffect(() => {
-    // Temporarily keeping tournament global if needed, but matches must be local
-    fetch('/api/tournaments').then(r => r.json()).then(d => {
+    tournamentService.getTournaments().then(d => {
       setTournaments(Array.isArray(d) ? d : []);
       const urlParams = new URLSearchParams(window.location.search);
       const queryTourneyId = urlParams.get('tournamentId');

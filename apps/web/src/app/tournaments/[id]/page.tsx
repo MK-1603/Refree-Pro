@@ -11,6 +11,7 @@ import { StandingsTable } from '@/components/tournament/StandingsTable';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { Modal } from '@/components/ui/Modal';
 import { Plus, Edit, FileText, MapPin, Calendar, Trash2, Trophy, ListOrdered, Swords, GitMerge, BarChart3, Settings2 } from 'lucide-react';
+import { tournamentService } from '@/services/tournamentService';
 
 export default function TournamentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [id, setId] = useState('');
@@ -24,12 +25,14 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
   useEffect(() => {
     params.then(async ({ id }) => {
       setId(id);
-      const [dr, sr] = await Promise.all([
-        fetch(`/api/tournaments/${id}`),
-        fetch(`/api/tournaments/${id}/standings`),
-      ]);
-      setData(await dr.json());
-      setStandings(await sr.json());
+      try {
+        const data = await tournamentService.getTournament(id);
+        const standings = await tournamentService.getStandings(id);
+        setData(data);
+        setStandings(standings);
+      } catch (err) {
+        console.error(err);
+      }
       setLoading(false);
     });
   }, [params]);
@@ -239,7 +242,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ id:
               <Button variant="ghost" className="flex-1 border border-border" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
               <Button variant="danger" className="flex-1" onClick={async () => {
                 try {
-                  await fetch(`/api/tournaments/${id}`, { method: 'DELETE' });
+                  await tournamentService.deleteTournament(id);
                   router.push('/tournaments');
                 } catch (e) { alert('Failed to delete tournament'); }
               }}>

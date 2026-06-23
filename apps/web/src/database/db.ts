@@ -1,5 +1,15 @@
 import Dexie, { Table } from 'dexie';
 
+export interface Tournament {
+  id: string;
+  name: string;
+  venue: string;
+  startDate: string;
+  endDate: string;
+  status: 'active' | 'completed';
+  createdAt: number;
+}
+
 export interface Match {
   id: string;
   tournamentId?: string | null;
@@ -69,6 +79,7 @@ export interface MatchTimerState {
 }
 
 export class RefereeDatabase extends Dexie {
+  tournaments!: Table<Tournament>;
   matches!: Table<Match>;
   players!: Table<Player>;
   events!: Table<MatchEvent>;
@@ -76,7 +87,8 @@ export class RefereeDatabase extends Dexie {
 
   constructor() {
     super('RefereeProDB');
-    this.version(1).stores({
+    this.version(2).stores({
+      tournaments: 'id, status, createdAt',
       matches: 'id, status, matchDate, createdAt',
       players: 'id, matchId, team',
       events: 'id, matchId, eventType, minute, createdAt',

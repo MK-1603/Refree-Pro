@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
 import { Search } from 'lucide-react';
 import { matchService } from '@/services/matchService';
+import { tournamentService } from '@/services/tournamentService';
 
 const tabs = ['matches', 'tournaments'];
 
@@ -20,7 +21,7 @@ export default function HistoryPage() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    Promise.all([matchService.getMatches(), fetch('/api/tournaments').then(r => r.json()).catch(() => [])])
+    Promise.all([matchService.getMatches(), tournamentService.getTournaments()])
       .then(([m, t]) => {
         setMatches(Array.isArray(m) ? m.filter((x: any) => x.status === 'completed') : []);
         setTournaments(Array.isArray(t) ? t : []);

@@ -11,6 +11,7 @@ import { MatchCard } from '@/components/match/MatchCard';
 import { TournamentCard } from '@/components/tournament/TournamentCard';
 import { Plus, FileText, History, Trophy, Swords, Share2, Activity, Play } from 'lucide-react';
 import { matchService } from '@/services/matchService';
+import { tournamentService } from '@/services/tournamentService';
 
 export default function DashboardPage() {
   const [matches, setMatches] = useState<any[]>([]);
@@ -21,7 +22,7 @@ export default function DashboardPage() {
   useEffect(() => {
     Promise.all([
       matchService.getMatches(),
-      fetch('/api/tournaments').then(r => r.json()).catch(() => []),
+      tournamentService.getTournaments(),
     ]).then(([m, t]) => {
       setMatches(Array.isArray(m) ? m : []);
       setTournaments(Array.isArray(t) ? t : []);
@@ -40,6 +41,26 @@ export default function DashboardPage() {
       router.push(`/matches/${completedMatches[0].id}/poster`);
     } else {
       alert("No completed matches available to generate a poster.");
+    }
+  };
+
+  const handleDeleteMatch = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this match?')) {
+      await matchService.deleteMatch(id);
+      setMatches(matches.filter(m => m.id !== id));
+    }
+  };
+
+  const handleDeleteTournament = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this tournament? All associated matches will also be deleted.')) {
+      await tournamentService.deleteTournament(id);
+      setTournaments(tournaments.filter(t => t.id !== id));
+      const m = await matchService.getMatches();
+      setMatches(Array.isArray(m) ? m : []);
     }
   };
 
@@ -138,7 +159,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="space-y-3">
                     {upcomingMatches.slice(0, 3).map((m) => (
-                      <MatchCard key={m.id} {...m} matchDate={m.matchDate} matchTime={m.matchTime} />
+                      <MatchCard key={m.id} {...m} matchDate={m.matchDate} matchTime={m.matchTime} onDelete={(e) => handleDeleteMatch(m.id, e)} />
                     ))}
                   </div>
                 </div>
@@ -151,7 +172,7 @@ export default function DashboardPage() {
                   </h2>
                   <div className="space-y-3">
                     {activeTournaments.slice(0, 2).map((t) => (
-                      <TournamentCard key={t.id} {...t} played={0} total={0} startDate={t.startDate} endDate={t.endDate} />
+                      <TournamentCard key={t.id} {...t} played={0} total={0} startDate={t.startDate} endDate={t.endDate} onDelete={(e) => handleDeleteTournament(t.id, e)} />
                     ))}
                   </div>
                 </div>

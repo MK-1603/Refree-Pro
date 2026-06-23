@@ -8,6 +8,7 @@ import { SkeletonCard } from '@/components/ui/Skeleton';
 import { useRouter } from 'next/navigation';
 import { Plus, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { tournamentService } from '@/services/tournamentService';
 
 export default function TournamentsPage() {
   const [tournaments, setTournaments] = useState<any[]>([]);
@@ -16,11 +17,20 @@ export default function TournamentsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/tournaments').then(r => r.json()).then(d => {
+    tournamentService.getTournaments().then(d => {
       setTournaments(Array.isArray(d) ? d : []);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this tournament? All associated matches will also be deleted.')) {
+      await tournamentService.deleteTournament(id);
+      setTournaments(tournaments.filter(t => t.id !== id));
+    }
+  };
 
   const filtered = tournaments.filter(t => tab === 'active' ? t.status === 'active' : t.status !== 'active');
 
@@ -56,7 +66,7 @@ export default function TournamentsPage() {
         ) : (
           <div className="space-y-3">
             {filtered.map(t => (
-              <TournamentCard key={t.id} {...t} played={0} total={0} startDate={t.startDate} endDate={t.endDate} />
+              <TournamentCard key={t.id} {...t} played={0} total={0} startDate={t.startDate} endDate={t.endDate} onDelete={(e) => handleDelete(t.id, e)} />
             ))}
           </div>
         )}
