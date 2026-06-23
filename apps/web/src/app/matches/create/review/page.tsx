@@ -11,6 +11,7 @@ import {
   ChevronLeft, CheckCircle2, Rocket,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { matchService } from '@/services/matchService';
 
 const FootballModel = dynamic(
   () => import('@/components/3d/FootballModel').then(m => ({ default: m.FootballModel })),
@@ -59,35 +60,28 @@ export default function ReviewPage() {
   }, [success, reset, router]);
 
   const handleCreate = async () => {
-    if (!navigator.onLine) { toast('Internet connection required.', 'error'); return; }
     setLoading(true);
     try {
-      const res = await fetch('/api/matches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tournamentId:  state.tournamentId?.trim() || null,
-          venue:         state.venue,
-          matchNumber:   parseInt(state.matchNumber),
-          matchDate:     state.matchDate,
-          matchTime:     state.matchTime,
-          refereeName:   state.refereeName || null,
-          teamA:         state.teamA,
-          teamB:         state.teamB,
-          teamAColor:    state.teamAColor,
-          teamBColor:    state.teamBColor,
-          squadFormat:   state.squadFormat,
-          matchDuration: state.matchDuration,
-          breakDuration: state.breakDuration,
-          extraTime:     state.extraTime,
-          players:       state.players.filter(p => p.name),
-        }),
+      await matchService.createMatch({
+        tournamentId:  state.tournamentId?.trim() || null,
+        venue:         state.venue,
+        matchNumber:   parseInt(state.matchNumber),
+        matchDate:     state.matchDate,
+        matchTime:     state.matchTime,
+        refereeName:   state.refereeName || null,
+        teamA:         state.teamA,
+        teamB:         state.teamB,
+        teamAColor:    state.teamAColor,
+        teamBColor:    state.teamBColor,
+        squadFormat:   state.squadFormat,
+        matchDuration: state.matchDuration,
+        breakDuration: state.breakDuration,
+        extraTime:     state.extraTime,
+        players:       state.players.filter(p => p.name),
       });
-      const data = await res.json();
-      if (!res.ok) { toast(`Failed: ${data?.detail || data?.error || 'Unknown error'}`, 'error'); return; }
       setSuccess(true);
     } catch (e) {
-      toast(`Error: ${e instanceof Error ? e.message : 'Network error'}`, 'error');
+      toast(`Error: ${e instanceof Error ? e.message : 'Storage error'}`, 'error');
     } finally {
       setLoading(false);
     }

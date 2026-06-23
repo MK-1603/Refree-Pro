@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/Button';
 import { MatchCard } from '@/components/match/MatchCard';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils';
-import { Plus, Swords } from 'lucide-react';
+import { Plus, Swords, Download, Upload } from 'lucide-react';
+import { matchService } from '@/services/matchService';
+import { backupService } from '@/services/backupService';
 
 const tabs = ['all', 'scheduled', 'live', 'completed'];
 
@@ -18,7 +20,7 @@ export default function MatchesPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/matches?global=true').then(r => r.json()).then(d => {
+    matchService.getMatches().then(d => {
       setMatches(Array.isArray(d) ? d : []);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -37,9 +39,29 @@ export default function MatchesPage() {
       >
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Match Hub</h1>
-          <Button size="sm" onClick={() => router.push('/matches/create/details')}>
-            <Plus size={16} /> Schedule Match
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={() => backupService.exportBackup()} title="Export Backup">
+              <Download size={16} />
+            </Button>
+            <label className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80" title="Import Backup">
+              <Upload size={16} />
+              <input type="file" className="hidden" accept=".refereepro,.json" onChange={async (e) => {
+                if (e.target.files && e.target.files[0]) {
+                  try {
+                    await backupService.importBackup(e.target.files[0]);
+                    const d = await matchService.getMatches();
+                    setMatches(Array.isArray(d) ? d : []);
+                    alert('Backup imported successfully');
+                  } catch (err) {
+                    alert('Failed to import backup');
+                  }
+                }
+              }} />
+            </label>
+            <Button size="sm" onClick={() => router.push('/matches/create/details')}>
+              <Plus size={16} /> Schedule Match
+            </Button>
+          </div>
         </div>
 
         {/* Filter tabs */}

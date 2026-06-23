@@ -369,7 +369,7 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
       {/* Background Selector & Theme Controls */}
       <div className="shrink-0 flex flex-col border-b border-border/10 z-10 bg-background">
         <div className="px-4 py-3 overflow-x-auto scrollbar-hide flex gap-2">
-          {Array.from({ length: 10 }).map((_, i) => {
+          {Array.from({ length: 7 }).map((_, i) => {
             const index = i + 1;
             const src = `/posters/bg-${index}.png`;
             return (
@@ -412,7 +412,7 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
       </div>
 
       {/* Poster Preview */}
-      <div ref={containerRef} className="flex-1 min-h-0 flex items-center justify-center p-4 bg-[#0a0a0a]">
+      <div ref={containerRef} className="flex-1 min-h-0 flex items-center justify-center p-4 bg-background">
         <div style={{ width: 540 * scale, height: 960 * scale, position: 'relative' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, width: 540, height: 960, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
             <div ref={posterRef} className="rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 w-full h-full relative bg-[#050505]">

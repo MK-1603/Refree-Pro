@@ -12,6 +12,7 @@ import {
   ArrowLeftRight, AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { matchService } from '@/services/matchService';
 
 /* ── Status badge ─────────────────────────────────────────────── */
 function StatusPill({ status }: { status: string }) {
@@ -139,14 +140,14 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     params.then(async ({ id }) => {
       setId(id);
-      const [mr, er] = await Promise.all([
-        fetch(`/api/matches/${id}`),
-        fetch(`/api/matches/${id}/events`),
-      ]);
-      const d = await mr.json();
-      setMatch(d.match);
-      setPlayers(d.players || []);
-      setEvents(await er.json());
+      try {
+        const data = await matchService.getMatchFull(id);
+        setMatch(data.match);
+        setPlayers(data.players || []);
+        setEvents(data.events || []);
+      } catch (err) {
+        console.error(err);
+      }
       setLoading(false);
     });
   }, [params]);

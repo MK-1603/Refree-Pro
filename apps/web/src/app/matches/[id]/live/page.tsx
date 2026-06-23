@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
 import { Pause, Play, Timer, CheckCircle, ChevronLeft, ArrowLeftRight, RotateCcw, AlignRight, AlertTriangle } from 'lucide-react';
+import { matchService } from '@/services/matchService';
 
 export default function LiveMatchPage({ params }: { params: Promise<{ id: string }> }) {
   const [id, setId] = useState('');
@@ -54,25 +55,25 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
   useEffect(() => {
     params.then(async ({ id: matchId }) => {
       setId(matchId);
-      const [mRes, eRes] = await Promise.all([
-        fetch(`/api/matches/${matchId}`),
-        fetch(`/api/matches/${matchId}/events`),
-      ]);
-      const mData = await mRes.json();
-      const eData = await eRes.json();
-      setMatch(mData.match);
-      setPlayers(mData.players || []);
-      setEvents(Array.isArray(eData) ? eData : []);
-      setScore(mData.match.scoreA ?? 0, mData.match.scoreB ?? 0);
-      if (mData.timer) {
-        const t = mData.timer;
-        const elapsed = t.isRunning
-          ? MatchTimer.calculateElapsed(t.startedAtUnix, t.totalPausedMs, null, true)
-          : MatchTimer.calculateElapsed(t.startedAtUnix, t.totalPausedMs, t.pausedAtUnix, false);
-        setTimer({ startedAtUnix: t.startedAtUnix, pausedAtUnix: t.pausedAtUnix, totalPausedMs: t.totalPausedMs, isRunning: t.isRunning, currentHalf: t.currentHalf ?? 1, elapsedMs: elapsed, injuryTimeMs: t.injuryTimeMs ?? 0 });
-        if (t.isRunning) toast('Resumed from saved state', 'info');
-      } else {
-        setTimer({ startedAtUnix: null, pausedAtUnix: null, totalPausedMs: 0, isRunning: false, currentHalf: 1, elapsedMs: 0 });
+      try {
+        const data = await matchService.getMatchFull(matchId);
+        setMatch(data.match);
+        setPlayers(data.players || []);
+        setEvents(Array.isArray(data.events) ? data.events : []);
+        setScore(data.match.scoreA ?? 0, data.match.scoreB ?? 0);
+        if (data.timer) {
+          const t = data.timer;
+          const elapsed = t.isRunning
+            ? MatchTimer.calculateElapsed(t.startedAtUnix, t.totalPausedMs, null, true)
+            : MatchTimer.calculateElapsed(t.startedAtUnix, t.totalPausedMs, t.pausedAtUnix, false);
+          setTimer({ startedAtUnix: t.startedAtUnix, pausedAtUnix: t.pausedAtUnix, totalPausedMs: t.totalPausedMs, isRunning: t.isRunning, currentHalf: t.currentHalf ?? 1, elapsedMs: elapsed, injuryTimeMs: t.injuryTimeMs ?? 0 });
+          if (t.isRunning) toast('Resumed from saved state', 'info');
+        } else {
+          setTimer({ startedAtUnix: null, pausedAtUnix: null, totalPausedMs: 0, isRunning: false, currentHalf: 1, elapsedMs: 0 });
+        }
+      } catch (err) {
+        console.error(err);
+        toast('Match not found locally', 'error');
       }
     });
   }, [params]);
@@ -85,7 +86,7 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
 
   useEffect(() => {
     if (!id || !timer.isRunning) return;
-    const pauseOnHide = () => fetch(`/api/matches/${id}/timer/pause`, { method: 'POST', keepalive: true }).catch(() => {});
+    const pauseOnHide = () => matchService.pauseTimer(id).catch(() => {});
     const onVis = () => { if (document.visibilityState === 'hidden') pauseOnHide(); };
     document.addEventListener('visibilitychange', onVis);
     window.addEventListener('beforeunload', pauseOnHide);
@@ -118,17 +119,11 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
     ? MatchTimer.getMinute(timer.elapsedMs + (match?.matchDuration ?? 45) * 60 * 1000)
     : MatchTimer.getMinute(timer.elapsedMs);
 
-  const apiCall = useCallback(async (url: string, body: object) => {
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    if (!res.ok) throw new Error();
-    return res.json();
-  }, []);
-
   const handleAddInjuryTime = async (minutes: number) => {
     if (!minutes || minutes <= 0) return;
     try {
       const ms = (timer.injuryTimeMs || 0) + minutes * 60000;
-      await fetch(`/api/matches/${id}/timer/injury-time`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ injuryTimeMs: ms }) });
+      await matchService.setInjuryTime(id, ms);
       setTimer({ injuryTimeMs: ms });
       setShowDecisionPanel(false);
       setCustomInjuryTime('');
@@ -138,15 +133,15 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
   };
 
   const handleGoal = async (data: any) => {
-    try { const res = await apiCall(`/api/matches/${id}/goals`, data); setScore(res.scoreA, res.scoreB); setEvents(e => [...e, { ...res.goal, eventType: 'goal' }]); toast('⚽ Goal recorded!'); }
+    try { const res = await matchService.addGoal(id, data); setScore(res.scoreA, res.scoreB); setEvents(e => [...e, res.goal]); toast('⚽ Goal recorded!'); }
     catch { toast('Failed to record goal', 'error'); }
   };
   const handleCard = async (data: any) => {
-    try { const res = await apiCall(`/api/matches/${id}/cards`, data); setEvents(e => [...e, { ...res, eventType: 'card' }]); toast(`${data.cardType === 'yellow' ? '🟨' : '🟥'} Card issued`); }
+    try { const res = await matchService.addCard(id, data); setEvents(e => [...e, res]); toast(`${data.cardType === 'yellow' ? '🟨' : '🟥'} Card issued`); }
     catch { toast('Failed', 'error'); }
   };
   const handleSub = async (data: any) => {
-    try { const res = await apiCall(`/api/matches/${id}/substitutions`, data); setEvents(e => [...e, { ...res, eventType: 'sub' }]); toast('🔄 Sub recorded'); }
+    try { const res = await matchService.addSub(id, data); setEvents(e => [...e, res]); toast('🔄 Sub recorded'); }
     catch { toast('Failed', 'error'); }
   };
 
@@ -160,21 +155,19 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
         const extra = timer.pausedAtUnix ? now - timer.pausedAtUnix : 0;
         setTimer({ isRunning: true, pausedAtUnix: null, totalPausedMs: timer.totalPausedMs + extra, startedAtUnix: timer.startedAtUnix || now });
       }
-      const res = await fetch(`/api/matches/${id}/timer/${running ? 'pause' : 'start'}`, { method: 'POST' });
-      const t = await res.json();
-      setTimer({ isRunning: t.isRunning, pausedAtUnix: t.pausedAtUnix, totalPausedMs: t.totalPausedMs, startedAtUnix: t.startedAtUnix });
+      const t = running ? await matchService.pauseTimer(id) : await matchService.startTimer(id);
+      if (t) setTimer({ isRunning: t.isRunning, pausedAtUnix: t.pausedAtUnix, totalPausedMs: t.totalPausedMs, startedAtUnix: t.startedAtUnix });
     } catch { toast('Timer error', 'error'); }
   };
 
   const handleHalftime = async () => {
-    try { await fetch(`/api/matches/${id}/timer/halftime`, { method: 'POST' }); router.push(`/matches/${id}/halftime`); }
+    try { await matchService.endHalf(id); router.push(`/matches/${id}/halftime`); }
     catch { toast('Failed', 'error'); }
   };
 
   const handleUndo = async () => {
     try {
-      const res = await fetch(`/api/matches/${id}/undo`, { method: 'POST' });
-      const data = await res.json();
+      const data = await matchService.undoLastEvent(id);
       if (data.scoreA !== undefined) setScore(data.scoreA, data.scoreB);
       setEvents(evs => { const last = [...evs].reverse().find(e => !e.isUndone); if (!last) return evs; return evs.map(e => e.id === last.id ? { ...e, isUndone: true } : e); });
       toast('Event undone');
@@ -194,7 +187,7 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
         playerIn: editState.playerIn,
         playerOut: editState.playerOut,
       };
-      await fetch(`/api/matches/${id}/events/${editingEvent.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      await matchService.updateEvent(id, editingEvent.id, payload);
       setEvents(evs => evs.map(e => e.id === editingEvent.id ? { ...e, ...payload } : e));
       setEditingEvent(null);
       toast('Event updated');

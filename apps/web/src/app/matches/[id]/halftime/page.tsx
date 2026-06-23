@@ -7,6 +7,7 @@ import { EventItem } from '@/components/match/EventItem';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { Play, Pause, ChevronRight } from 'lucide-react';
+import { matchService } from '@/services/matchService';
 
 export default function HalftimePage({ params }: { params: Promise<{ id: string }> }) {
   const [id, setId] = useState('');
@@ -28,15 +29,15 @@ export default function HalftimePage({ params }: { params: Promise<{ id: string 
   useEffect(() => {
     params.then(async ({ id: matchId }) => {
       setId(matchId);
-      const [matchRes, eventsRes] = await Promise.all([
-        fetch(`/api/matches/${matchId}`),
-        fetch(`/api/matches/${matchId}/events`),
-      ]);
-      const d = await matchRes.json();
-      setMatch(d.match);
-      setEvents(await eventsRes.json());
-      setRemainingMs(d.match.breakDuration * 60 * 1000);
-      lastTickRef.current = Date.now();
+      try {
+        const data = await matchService.getMatchFull(matchId);
+        setMatch(data.match);
+        setEvents(data.events || []);
+        setRemainingMs(data.match.breakDuration * 60 * 1000);
+        lastTickRef.current = Date.now();
+      } catch (err) {
+        console.error(err);
+      }
 
       const tick = () => {
         const now = Date.now();
@@ -55,7 +56,7 @@ export default function HalftimePage({ params }: { params: Promise<{ id: string 
   const handleStartSecondHalf = async () => {
     setLoading(true);
     try {
-      await fetch(`/api/matches/${id}/timer/second-half`, { method: 'POST' });
+      await matchService.startSecondHalf(id);
       router.push(`/matches/${id}/live`);
     } catch { toast('Failed', 'error'); setLoading(false); }
   };

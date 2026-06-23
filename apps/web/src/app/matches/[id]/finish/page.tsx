@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/Toast';
 import { CheckCircle, Flag, CreditCard, ArrowLeftRight, Clock, MapPin, Hash } from 'lucide-react';
+import { matchService } from '@/services/matchService';
 
 type Event = any;
 
@@ -34,33 +35,20 @@ export default function FinishPage({ params }: { params: Promise<{ id: string }>
   useEffect(() => {
     params.then(async ({ id }) => {
       setId(id);
-      const [mr, er] = await Promise.all([
-        fetch(`/api/matches/${id}`),
-        fetch(`/api/matches/${id}/events`),
-      ]);
-      const d = await mr.json();
-      setMatch(d.match);
-      setEvents(await er.json());
+      try {
+        const data = await matchService.getMatchFull(id);
+        setMatch(data.match);
+        setEvents(data.events || []);
+      } catch (err) {
+        console.error(err);
+      }
     });
   }, [params]);
 
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      await fetch(`/api/matches/${id}`, {
-        method: 'POST' ,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'completed', completedAt: new Date().toISOString() }),
-      });
-      await fetch(`/api/matches/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'completed', completedAt: new Date().toISOString() }),
-      });
-      await fetch(`/api/matches/${id}/timer/complete`, { method: 'POST' });
-      if (match.tournamentId) {
-        await fetch(`/api/tournaments/${match.tournamentId}/standings/recalculate`, { method: 'POST' });
-      }
+      await matchService.updateMatch(id, { status: 'completed', completedAt: new Date() });
       setConfirmed(true);
       setTimeout(() => router.push(`/matches/${id}/lock`), 1800);
     } catch {
