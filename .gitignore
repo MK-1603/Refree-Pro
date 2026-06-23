@@ -11,14 +11,16 @@ node_modules
 !.yarn/versions
 
 # testing
-/coverage
+coverage/
 
 # next.js
-/.next/
-/out/
+.next/
+out/
+build/
+dist/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store
@@ -39,8 +41,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/public/sw.js
-/public/sw.js.map
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/swe-worker-*.js
 
 # documentation
-/docs
+docs/
