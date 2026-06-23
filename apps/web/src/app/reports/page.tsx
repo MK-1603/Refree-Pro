@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { FileText } from 'lucide-react';
+import { matchService } from '@/services/matchService';
 
 export default function ReportsPage() {
   const [matches, setMatches] = useState<any[]>([]);
@@ -15,7 +16,7 @@ export default function ReportsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    Promise.all([fetch('/api/matches').then(r => r.json()), fetch('/api/tournaments').then(r => r.json())])
+    Promise.all([matchService.getMatches(), fetch('/api/tournaments').then(r => r.json()).catch(() => [])])
       .then(([m, t]) => {
         setMatches(Array.isArray(m) ? m.filter((x: any) => x.status === 'completed') : []);
         setTournaments(Array.isArray(t) ? t : []);

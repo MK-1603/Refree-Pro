@@ -63,9 +63,10 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
         setScore(data.match.scoreA ?? 0, data.match.scoreB ?? 0);
         if (data.timer) {
           const t = data.timer;
+          const startedAt = t.startedAtUnix || Date.now();
           const elapsed = t.isRunning
-            ? MatchTimer.calculateElapsed(t.startedAtUnix, t.totalPausedMs, null, true)
-            : MatchTimer.calculateElapsed(t.startedAtUnix, t.totalPausedMs, t.pausedAtUnix, false);
+            ? MatchTimer.calculateElapsed(startedAt, t.totalPausedMs, null, true)
+            : MatchTimer.calculateElapsed(startedAt, t.totalPausedMs, t.pausedAtUnix, false);
           setTimer({ startedAtUnix: t.startedAtUnix, pausedAtUnix: t.pausedAtUnix, totalPausedMs: t.totalPausedMs, isRunning: t.isRunning, currentHalf: t.currentHalf ?? 1, elapsedMs: elapsed, injuryTimeMs: t.injuryTimeMs ?? 0 });
           if (t.isRunning) toast('Resumed from saved state', 'info');
         } else {

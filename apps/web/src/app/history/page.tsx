@@ -8,6 +8,7 @@ import { SkeletonCard } from '@/components/ui/Skeleton';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
 import { Search } from 'lucide-react';
+import { matchService } from '@/services/matchService';
 
 const tabs = ['matches', 'tournaments'];
 
@@ -19,7 +20,7 @@ export default function HistoryPage() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    Promise.all([fetch('/api/matches').then(r => r.json()), fetch('/api/tournaments').then(r => r.json())])
+    Promise.all([matchService.getMatches(), fetch('/api/tournaments').then(r => r.json()).catch(() => [])])
       .then(([m, t]) => {
         setMatches(Array.isArray(m) ? m.filter((x: any) => x.status === 'completed') : []);
         setTournaments(Array.isArray(t) ? t : []);

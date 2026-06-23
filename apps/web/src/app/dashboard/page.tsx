@@ -10,6 +10,7 @@ import { SkeletonCard } from '@/components/ui/Skeleton';
 import { MatchCard } from '@/components/match/MatchCard';
 import { TournamentCard } from '@/components/tournament/TournamentCard';
 import { Plus, FileText, History, Trophy, Swords, Share2, Activity, Play } from 'lucide-react';
+import { matchService } from '@/services/matchService';
 
 export default function DashboardPage() {
   const [matches, setMatches] = useState<any[]>([]);
@@ -19,8 +20,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/matches').then(r => r.json()),
-      fetch('/api/tournaments').then(r => r.json()),
+      matchService.getMatches(),
+      fetch('/api/tournaments').then(r => r.json()).catch(() => []),
     ]).then(([m, t]) => {
       setMatches(Array.isArray(m) ? m : []);
       setTournaments(Array.isArray(t) ? t : []);

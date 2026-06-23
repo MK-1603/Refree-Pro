@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { FileText, Download, Target, Activity, ShieldAlert, Award } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { MatchTimer } from '@/lib/timer';
+import { matchService } from '@/services/matchService';
 
 export default function MatchReportPage({ params }: { params: Promise<{ id: string }> }) {
   const [match, setMatch] = useState<any>(null);
@@ -16,11 +17,14 @@ export default function MatchReportPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     params.then(async ({ id }) => {
-      const [mr, er] = await Promise.all([fetch(`/api/matches/${id}`), fetch(`/api/matches/${id}/events`)]);
-      const d = await mr.json();
-      setMatch(d.match);
-      setEvents(await er.json());
-      setDataLoading(false);
+      try {
+        const data = await matchService.getMatchFull(id);
+        setMatch(data.match);
+        setEvents(data.events || []);
+        setDataLoading(false);
+      } catch (err) {
+        setDataLoading(false);
+      }
     });
   }, [params]);
 

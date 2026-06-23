@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { MapPin, Calendar, Clock, User, Trophy, ChevronLeft, AlertTriangle, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { matchService } from '@/services/matchService';
 
 export default function DetailsPage() {
   const { state, update } = useCreateMatch();
@@ -32,18 +33,19 @@ export default function DetailsPage() {
   const pageLoadTime = pageLoadTimeRef.current;
 
   useEffect(() => {
+    // Temporarily keeping tournament global if needed, but matches must be local
     fetch('/api/tournaments').then(r => r.json()).then(d => {
       setTournaments(Array.isArray(d) ? d : []);
       const urlParams = new URLSearchParams(window.location.search);
       const queryTourneyId = urlParams.get('tournamentId');
       if (queryTourneyId) update({ tournamentId: queryTourneyId });
-    });
+    }).catch(() => {});
 
-    fetch('/api/matches').then(r => r.json()).then(d => {
+    matchService.getMatches().then(d => {
       const fetched = Array.isArray(d) ? d : [];
       setExistingMatches(fetched);
       if (!state.matchNumber) {
-        const highest = fetched.reduce((max: number, m: any) => Math.max(max, m.matchNumber || 0), 0);
+        const highest = fetched.reduce((max: number, m: any) => Math.max(max, Number(m.matchNumber) || 0), 0);
         update({ matchNumber: String(highest + 1) });
       }
     });

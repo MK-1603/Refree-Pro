@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { toPng } from 'html-to-image';
 import { ChevronLeft, Download, Share2, Calendar, MapPin, Trophy, Users, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { matchService } from '@/services/matchService';
 
 const S = (obj: React.CSSProperties): React.CSSProperties => obj;
 
@@ -291,10 +292,13 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
 
   useEffect(() => {
     params.then(async ({ id }) => {
-      const [mr, er] = await Promise.all([fetch(`/api/matches/${id}`), fetch(`/api/matches/${id}/events`)]);
-      const d = await mr.json();
-      setMatch(d.match);
-      setEvents(await er.json());
+      try {
+        const data = await matchService.getMatchFull(id);
+        setMatch(data.match);
+        setEvents(data.events || []);
+      } catch (e) {
+        console.error(e);
+      }
     });
   }, [params]);
 
