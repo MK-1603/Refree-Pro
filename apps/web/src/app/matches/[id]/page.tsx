@@ -327,12 +327,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
               >
                 <ImageIcon size={13} /> Poster
               </button>
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-2 px-4 h-10 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-[12px] font-black hover:bg-red-500/20 active:scale-95 transition-all"
-              >
-                <Trash2 size={13} /> Delete
-              </button>
             </>
           )}
         </div>
