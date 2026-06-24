@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Scoreboard } from '@/components/match/Scoreboard';
 import { Button } from '@/components/ui/Button';
@@ -9,16 +9,17 @@ import { useToast } from '@/components/ui/Toast';
 import { CheckCircle, FileText, Image, Eye } from 'lucide-react';
 import { matchService } from '@/services/matchService';
 
-export default function LockPage({ params }: { params: Promise<{ id: string }> }) {
-  const [id, setId] = useState('');
+export default function LockPage() {
+  const params = useParams();
+  const id = params?.id as string || '';
   const [match, setMatch] = useState<any>(null);
   const [locked, setLocked] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
-    params.then(async ({ id }) => {
-      setId(id);
+    if (!id) return;
+    const fetchMatch = async () => {
       try {
         const data = await matchService.getMatchFull(id);
         setMatch(data.match);
@@ -27,8 +28,9 @@ export default function LockPage({ params }: { params: Promise<{ id: string }> }
         console.error(err);
         toast('Failed to load match', 'error');
       }
-    });
-  }, [params]);
+    };
+    fetchMatch();
+  }, [id]);
 
   const handleLock = async () => {
     try {

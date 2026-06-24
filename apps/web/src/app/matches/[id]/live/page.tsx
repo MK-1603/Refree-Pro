@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMatchStore } from '@/store/matchStore';
 import { MatchTimer } from '@/lib/timer';
@@ -15,8 +15,9 @@ import { useToast } from '@/components/ui/Toast';
 import { Pause, Play, Timer, CheckCircle, ChevronLeft, ArrowLeftRight, RotateCcw, AlignRight, AlertTriangle } from 'lucide-react';
 import { matchService } from '@/services/matchService';
 
-export default function LiveMatchPage({ params }: { params: Promise<{ id: string }> }) {
-  const [id, setId] = useState('');
+export default function LiveMatchPage() {
+  const params = useParams();
+  const id = params?.id as string || '';
   const [match, setMatch] = useState<any>(null);
   const [players, setPlayers] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
@@ -53,13 +54,13 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
   const triggerSub    = () => { setPendingElapsedMs(getOffsetElapsedMs()); setShowSub(true); };
 
   useEffect(() => {
-    params.then(async ({ id: matchId }) => {
-      setId(matchId);
+    if (!id) return;
+    const fetchMatch = async () => {
       try {
-        const data = await matchService.getMatchFull(matchId);
+        const data = await matchService.getMatchFull(id);
         setMatch(data.match);
-        setPlayers(data.players || []);
         setEvents(Array.isArray(data.events) ? data.events : []);
+        setPlayers(data.players || []);
         setScore(data.match.scoreA ?? 0, data.match.scoreB ?? 0);
         if (data.timer) {
           const t = data.timer;
@@ -76,8 +77,9 @@ export default function LiveMatchPage({ params }: { params: Promise<{ id: string
         console.error(err);
         toast('Match not found locally', 'error');
       }
-    });
-  }, [params]);
+    };
+    fetchMatch();
+  }, [id]);
 
   useEffect(() => {
     const tick = () => { tickTimer(); rafRef.current = requestAnimationFrame(tick); };

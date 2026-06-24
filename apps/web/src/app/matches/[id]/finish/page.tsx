@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/Toast';
 import { CheckCircle, Flag, CreditCard, ArrowLeftRight, Clock, MapPin, Hash } from 'lucide-react';
@@ -23,8 +23,9 @@ function TeamLabel({ name, color }: { name: string; color: string }) {
   );
 }
 
-export default function FinishPage({ params }: { params: Promise<{ id: string }> }) {
-  const [id, setId]     = useState('');
+export default function FinishPage() {
+  const params = useParams();
+  const id = params?.id as string || '';
   const [match, setMatch] = useState<any>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,8 +34,8 @@ export default function FinishPage({ params }: { params: Promise<{ id: string }>
   const router    = useRouter();
 
   useEffect(() => {
-    params.then(async ({ id }) => {
-      setId(id);
+    if (!id) return;
+    const fetchMatch = async () => {
       try {
         const data = await matchService.getMatchFull(id);
         setMatch(data.match);
@@ -42,8 +43,9 @@ export default function FinishPage({ params }: { params: Promise<{ id: string }>
       } catch (err) {
         console.error(err);
       }
-    });
-  }, [params]);
+    };
+    fetchMatch();
+  }, [id]);
 
   const handleConfirm = async () => {
     setLoading(true);
