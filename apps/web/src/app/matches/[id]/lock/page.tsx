@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useToast } from '@/components/ui/Toast';
 import { CheckCircle, FileText, Image, Eye } from 'lucide-react';
+import { matchService } from '@/services/matchService';
 
 export default function LockPage({ params }: { params: Promise<{ id: string }> }) {
   const [id, setId] = useState('');
@@ -16,23 +17,28 @@ export default function LockPage({ params }: { params: Promise<{ id: string }> }
   const router = useRouter();
 
   useEffect(() => {
-    params.then(({ id }) => {
+    params.then(async ({ id }) => {
       setId(id);
-      fetch(`/api/matches/${id}`).then(r => r.json()).then(d => {
-        setMatch(d.match);
-        setLocked(d.match.isLocked);
-      });
+      try {
+        const data = await matchService.getMatchFull(id);
+        setMatch(data.match);
+        setLocked(data.match.isLocked);
+      } catch (err) {
+        console.error(err);
+        toast('Failed to load match', 'error');
+      }
     });
   }, [params]);
 
   const handleLock = async () => {
-    await fetch(`/api/matches/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isLocked: true }),
-    });
-    setLocked(true);
-    toast('Match locked ✓');
+    try {
+      await matchService.updateMatch(id, { isLocked: true });
+      setLocked(true);
+      toast('Match locked ✓');
+    } catch (err) {
+      console.error(err);
+      toast('Failed to lock match', 'error');
+    }
   };
 
   if (!match) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full" /></div>;
