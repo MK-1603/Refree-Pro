@@ -125,7 +125,7 @@ export default function MatchReportPage({ params }: { params: Promise<{ id: stri
         
         {/* Header Actions */}
         <div className="flex items-center justify-between mb-8">
-          <button onClick={() => router.back()} className="w-10 h-10 flex items-center justify-center rounded-full bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-foreground transition-all">
+          <button onClick={() => router.push('/dashboard')} className="w-10 h-10 flex items-center justify-center rounded-full bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-foreground transition-all">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </button>
           <Button onClick={generatePDF} loading={loading} className="shadow-lg shadow-primary/20">
