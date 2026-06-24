@@ -82,13 +82,15 @@ function MasterPoster({ match, events, bgImage, accentColor }: { match: any; eve
   const reds     = active.filter(e => e.cardType === 'red').length;
   const winner   = scoreA > scoreB ? match.teamA : scoreB > scoreA ? match.teamB : 'DRAW';
 
-  const timelineEvents = [...active]
-    .filter(e => e.eventType === 'goal' || e.cardType || e.eventType === 'sub')
-    .sort((a, b) => a.minute - b.minute)
-    .slice(0, 7); // Show up to 7 events cleanly
+  let timelineEvents = [...active]
+    .filter(e => e.eventType === 'goal')
+    .sort((a, b) => a.minute - b.minute);
 
-  const hasEvents = timelineEvents.length > 0;
+  if (timelineEvents.length > 4) {
+    timelineEvents = timelineEvents.slice(0, 4);
+  }
 
+  const hasEvents = timelineEvents.length > 0
   return (
     <div style={S({ width: 540, height: 960, backgroundColor: '#050505', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'system-ui, -apple-system, Helvetica, Arial, sans-serif' })}>
       
@@ -96,12 +98,7 @@ function MasterPoster({ match, events, bgImage, accentColor }: { match: any; eve
       <div style={S({ position: 'absolute', inset: 0, zIndex: 0 })}>
         {bgImage ? (
           <>
-            <img src={bgImage} style={S({ width: '100%', height: '100%', objectFit: 'cover' })} alt="bg" crossOrigin="anonymous" 
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).parentElement!.style.background = 'radial-gradient(circle at 50% 30%, #1a1a2e 0%, #050505 100%)';
-              }} 
-            />
+            <div style={S({ width: '100%', height: '100%', backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' })} />
             <div style={S({ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.8) 100%)' })} />
           </>
         ) : (
@@ -350,7 +347,7 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
     <div className="fixed inset-0 bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <div className="shrink-0 px-4 pt-5 pb-4 border-b border-border/10 flex items-center gap-3 bg-background/95 backdrop-blur-xl z-10">
-        <button onClick={() => router.back()} className="w-9 h-9 rounded-full border border-border/40 bg-foreground/5 flex items-center justify-center hover:bg-foreground/10 active:scale-95 transition-all shrink-0">
+        <button onClick={() => router.push('/dashboard')} className="w-9 h-9 rounded-full border border-border/40 bg-foreground/5 flex items-center justify-center hover:bg-foreground/10 active:scale-95 transition-all shrink-0">
           <ChevronLeft size={18} strokeWidth={2.5} />
         </button>
         <div className="flex-1 min-w-0">

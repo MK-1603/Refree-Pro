@@ -10,6 +10,7 @@ import { SkeletonCard } from '@/components/ui/Skeleton';
 import { MatchCard } from '@/components/match/MatchCard';
 import { TournamentCard } from '@/components/tournament/TournamentCard';
 import { Plus, FileText, History, Trophy, Swords, Share2, Activity, Play } from 'lucide-react';
+import { Modal } from '@/components/ui/Modal';
 import { matchService } from '@/services/matchService';
 import { tournamentService } from '@/services/tournamentService';
 
@@ -17,6 +18,8 @@ export default function DashboardPage() {
   const [matches, setMatches] = useState<any[]>([]);
   const [tournaments, setTournaments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPosterModal, setShowPosterModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -35,14 +38,6 @@ export default function DashboardPage() {
   const completedMatches = matches.filter((m) => m.status === 'completed' || m.status === 'full_time');
   const recentReports = completedMatches.slice(0, 3);
   const activeTournaments = tournaments.filter((t) => t.status === 'active');
-
-  const handleGeneratePoster = () => {
-    if (completedMatches.length > 0) {
-      router.push(`/matches/${completedMatches[0].id}/poster`);
-    } else {
-      alert("No completed matches available to generate a poster.");
-    }
-  };
 
   const handleDeleteMatch = async (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,8 +62,14 @@ export default function DashboardPage() {
   const quickActions = [
     { icon: Plus, label: 'Schedule Match', href: '/matches/create/details', accent: true },
     { icon: Trophy, label: 'New Tournament', href: '/tournaments/create' },
-    { icon: FileText, label: 'View Reports', href: '/history' },
-    { icon: Share2, label: 'Generate Poster', action: handleGeneratePoster },
+    { icon: FileText, label: 'View Reports', action: () => {
+      if (completedMatches.length > 0) setShowReportModal(true);
+      else alert("No completed matches available for reports.");
+    }},
+    { icon: Share2, label: 'Generate Poster', action: () => {
+      if (completedMatches.length > 0) setShowPosterModal(true);
+      else alert("No completed matches available to generate a poster.");
+    }},
   ];
 
   return (
@@ -206,6 +207,44 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      <Modal open={showPosterModal} onClose={() => setShowPosterModal(false)} title="Generate Poster">
+        <div className="space-y-4">
+          <p className="text-sm text-muted">Select a completed match to generate a poster:</p>
+          <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
+            {completedMatches.map(m => (
+              <Button key={m.id} variant="secondary" className="w-full justify-start text-left h-auto py-3" onClick={() => router.push(`/matches/${m.id}/poster`)}>
+                <div className="flex flex-col w-full">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-bold text-sm">{m.teamA} vs {m.teamB}</span>
+                    <span className="text-primary font-bold">{m.scoreA} - {m.scoreB}</span>
+                  </div>
+                  <span className="text-xs text-muted">{m.matchDate} • {m.venue}</span>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={showReportModal} onClose={() => setShowReportModal(false)} title="View Report">
+        <div className="space-y-4">
+          <p className="text-sm text-muted">Select a completed match to view its report:</p>
+          <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
+            {completedMatches.map(m => (
+              <Button key={m.id} variant="secondary" className="w-full justify-start text-left h-auto py-3" onClick={() => router.push(`/matches/${m.id}/report`)}>
+                <div className="flex flex-col w-full">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-bold text-sm">{m.teamA} vs {m.teamB}</span>
+                    <span className="text-primary font-bold">{m.scoreA} - {m.scoreB}</span>
+                  </div>
+                  <span className="text-xs text-muted">{m.matchDate} • {m.venue}</span>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </div>
+      </Modal>
     </AppLayout>
   );
 }

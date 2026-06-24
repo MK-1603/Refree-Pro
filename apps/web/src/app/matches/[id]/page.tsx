@@ -202,7 +202,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
         {/* ── HEADER ── */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/10 px-4 py-3 flex items-center gap-3">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/dashboard')}
             className="w-9 h-9 rounded-full border border-border/40 bg-foreground/5 flex items-center justify-center hover:bg-foreground/10 active:scale-95 transition-all shrink-0"
           >
             <ChevronLeft size={18} strokeWidth={2.5} />

@@ -19,12 +19,10 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
   const secondHand = useRef<THREE.Group>(null);
   const minuteHand = useRef<THREE.Group>(null);
   const timeTextRef = useRef<HTMLSpanElement>(null);
-  const msTextRef = useRef<HTMLSpanElement>(null);
   const halfTextRef = useRef<HTMLSpanElement>(null);
   const isRunningRef = useRef<boolean>(false);
 
   useFrame((state, delta) => {
-    // Floating animation removed per user request
     const matchState = useMatchStore.getState();
     const timer = matchState.timer;
     const elapsedMs = timer.elapsedMs;
@@ -47,26 +45,22 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
     if (secondHand.current) secondHand.current.rotation.z = secRot;
     if (minuteHand.current) minuteHand.current.rotation.z = minRot;
 
-    // Update HTML overlay directly to avoid React re-renders at 60fps
-    if (timeTextRef.current || msTextRef.current) {
+    if (timeTextRef.current) {
       const display = MatchTimer.formatDisplay(displayElapsed);
       const parts = display.split('.');
-      if (timeTextRef.current) timeTextRef.current.innerText = parts[0];
-      if (msTextRef.current) msTextRef.current.innerText = parts[1] !== undefined ? `.${parts[1]}` : '';
+      timeTextRef.current.innerText = parts[0];
     }
     if (halfTextRef.current) {
       halfTextRef.current.innerText = halfLabels[currentHalf] ?? 'MATCH';
     }
 
-    if (timeTextRef.current && msTextRef.current && halfTextRef.current) {
+    if (timeTextRef.current && halfTextRef.current) {
       const textColor = '#ffffff';
 
       timeTextRef.current.style.color = textColor;
-      msTextRef.current.style.color = textColor;
       halfTextRef.current.style.color = textColor;
 
       timeTextRef.current.className = 'text-3xl font-extrabold tabular-nums';
-      msTextRef.current.className = 'opacity-75 font-bold ml-0.5 text-xl';
     }
   });
 
@@ -160,7 +154,6 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
         </span>
         <div className="flex items-baseline justify-center">
           <span ref={timeTextRef} className="text-3xl font-extrabold tabular-nums text-center">00:00</span>
-          <span ref={msTextRef} className="text-xl opacity-75 font-bold ml-0.5">.0</span>
         </div>
       </Html>
     </group>

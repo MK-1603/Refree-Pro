@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Stepper } from '@/components/ui/Stepper';
 import { useToast } from '@/components/ui/Toast';
 import { MapPin, Hash, Calendar, Clock, User } from 'lucide-react';
+import { matchService } from '@/services/matchService';
 
 export default function EditMatchPage({ params }: { params: Promise<{ id: string }> }) {
   const [id, setId] = useState('');
@@ -25,22 +26,28 @@ export default function EditMatchPage({ params }: { params: Promise<{ id: string
   useEffect(() => {
     params.then(async ({ id }) => {
       setId(id);
-      const res = await fetch(`/api/matches/${id}`);
-      const d = await res.json();
-      const m = d.match;
-      setMatch(m);
-      setVenue(m.venue); setMatchDate(m.matchDate); setMatchTime(m.matchTime);
-      setRefereeName(m.refereeName ?? ''); setMatchDuration(m.matchDuration); setBreakDuration(m.breakDuration);
+      try {
+        const d = await matchService.getMatchFull(id);
+        const m = d.match;
+        setMatch(m);
+        setVenue(m.venue); setMatchDate(m.matchDate); setMatchTime(m.matchTime);
+        setRefereeName(m.refereeName ?? ''); setMatchDuration(m.matchDuration); setBreakDuration(m.breakDuration);
+      } catch {
+        toast('Match not found', 'error');
+      }
     });
   }, [params]);
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await fetch(`/api/matches/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ venue, matchDate, matchTime, refereeName: refereeName || null, matchDuration, breakDuration }),
+      await matchService.updateMatch(id, { 
+        venue, 
+        matchDate, 
+        matchTime, 
+        refereeName: refereeName || null, 
+        matchDuration, 
+        breakDuration 
       });
       toast('Match updated!');
       router.push(`/matches/${id}`);
@@ -54,7 +61,7 @@ export default function EditMatchPage({ params }: { params: Promise<{ id: string
       <div className="text-center text-white/60">
         <p className="text-lg font-semibold">Cannot edit</p>
         <p className="text-sm mt-1">Match is locked</p>
-        <Button variant="secondary" className="mt-4" onClick={() => router.back()}>Go Back</Button>
+        <Button variant="secondary" className="mt-4" onClick={() => router.push(`/matches/${id}`)}>Go Back</Button>
       </div>
     </div>
   );
@@ -86,7 +93,7 @@ export default function EditMatchPage({ params }: { params: Promise<{ id: string
         </div>
 
         <div className="flex gap-3 mt-8">
-          <Button variant="ghost" onClick={() => router.back()}>Cancel</Button>
+          <Button variant="ghost" onClick={() => router.push(`/matches/${id}`)}>Cancel</Button>
           <Button className="flex-1" onClick={handleSave} loading={loading}>Save Changes</Button>
         </div>
       </motion.div>
