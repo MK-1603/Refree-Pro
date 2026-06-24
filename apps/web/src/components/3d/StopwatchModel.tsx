@@ -19,6 +19,7 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
   const secondHand = useRef<THREE.Group>(null);
   const minuteHand = useRef<THREE.Group>(null);
   const timeTextRef = useRef<HTMLSpanElement>(null);
+  const msTextRef = useRef<HTMLSpanElement>(null);
   const halfTextRef = useRef<HTMLSpanElement>(null);
   const isRunningRef = useRef<boolean>(false);
 
@@ -49,6 +50,9 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
       const display = MatchTimer.formatDisplay(displayElapsed);
       const parts = display.split('.');
       timeTextRef.current.innerText = parts[0];
+      if (msTextRef.current) {
+        msTextRef.current.innerText = `.${parts[1]}`;
+      }
     }
     if (halfTextRef.current) {
       halfTextRef.current.innerText = halfLabels[currentHalf] ?? 'MATCH';
@@ -153,7 +157,8 @@ function WatchSystem({ matchDuration = 45 }: { matchDuration?: number }) {
           MATCH
         </span>
         <div className="flex items-baseline justify-center">
-          <span ref={timeTextRef} className="text-3xl font-extrabold tabular-nums text-center">00:00</span>
+          <span ref={timeTextRef} className="text-3xl font-extrabold tabular-nums text-right">00:00</span>
+          <span ref={msTextRef} className="text-xl font-bold tabular-nums text-white/50 w-[36px] text-left inline-block">.00</span>
         </div>
       </Html>
     </group>
