@@ -282,7 +282,26 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
   const [exporting, setExp]   = useState(false);
   const [scale, setScale]     = useState(0.85);
   const [bgIndex, setBgIndex] = useState(1);
+  const [bgDataUrl, setBgDataUrl] = useState<string | null>(null);
   const [accent, setAccent]   = useState<string>('#d4af37'); // Default to Gold
+
+  useEffect(() => {
+    const loadBg = async () => {
+      try {
+        const response = await fetch(`/posters/bg-${bgIndex}.png`);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setBgDataUrl(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.error("Failed to load bg image", err);
+        setBgDataUrl(`/posters/bg-${bgIndex}.png`);
+      }
+    };
+    loadBg();
+  }, [bgIndex]);
   const posterRef  = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router     = useRouter();
@@ -417,7 +436,7 @@ export default function PosterPage({ params }: { params: Promise<{ id: string }>
         <div style={{ width: 540 * scale, height: 960 * scale, position: 'relative' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, width: 540, height: 960, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
             <div ref={posterRef} className="rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 w-full h-full relative bg-[#050505]">
-              <MasterPoster match={match} events={events} bgImage={`/posters/bg-${bgIndex}.png`} accentColor={accent} />
+              <MasterPoster match={match} events={events} bgImage={bgDataUrl || `/posters/bg-${bgIndex}.png`} accentColor={accent} />
             </div>
           </div>
         </div>
